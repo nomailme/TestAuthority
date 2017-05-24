@@ -23,18 +23,16 @@ namespace TestAuthority.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<FileResult> GetAsync(string password, string[] hostname)
+        public FileResult Get(string password, string[] hostname, string[] ipAddress)
         {
-            IPAddress connectionRemoteIpAddress = HttpContext.Connection.RemoteIpAddress;
-            IPHostEntry hostEntryAsync = await Dns.GetHostEntryAsync(connectionRemoteIpAddress);
-            string dnsHostname = hostEntryAsync.HostName;
-
             var hostnames = new List<string>
             {
                 "localhost",
-                connectionRemoteIpAddress.ToString(),
-                dnsHostname.Split('.')[0]
             };
+
+            var _ipAddresses = new List<string>();
+
+            ipAddress.ToList().ForEach(_ipAddresses.Add);
 
             if (hostname.Any())
             {
@@ -48,10 +46,12 @@ namespace TestAuthority.Web.Controllers
                 password = DefaultPassword;
             }
 
-            byte[] certificate = new CertificateBuilder().SetNotBefore(now)
+            byte[] certificate = new CertificateBuilder()
+                .SetNotBefore(now)
                 .SetNotAfter(now.AddYears(2))
-                .SetSubject(new X509NameWrapper().Add(X509Name.CN, dnsHostname))
-                .AddSubjectAltNameExtension(hostnames.ToList())
+                .SetSubject(new X509NameWrapper().Add(X509Name.CN, $"Endpoint certificate ({DateTime.Now}) "))
+                .AddSubjectAltNameExtension(hostnames.Select(x=>x.ToLowerInvariant()).ToList(),_ipAddresses)
+                .SetExtendedKeyUsage(KeyPurposeID.IdKPServerAuth, KeyPurposeID.IdKPClientAuth)
                 .GenerateCertificate(issuer, password);
 
             return File(certificate, MediaTypeNames.Application.Octet, "cert.pfx");

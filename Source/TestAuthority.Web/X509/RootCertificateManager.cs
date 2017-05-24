@@ -62,6 +62,7 @@ namespace TestAuthority.Web.X509
                 .SetSubject(subject)
                 .SetNotBefore(now)
                 .SetNotAfter(now.AddYears(2))
+                .SetExtendedKeyUsage(KeyPurposeID.IdKPServerAuth, KeyPurposeID.IdKPClientAuth)
                 .GenerateSelfSignedCertificate(Password);
         }
     }

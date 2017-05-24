@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using NLog;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
@@ -39,12 +40,19 @@ namespace TestAuthority.Web.X509
 
         public X509NameWrapper Subject { get; set; }
 
-        public CertificateBuilder AddSubjectAltNameExtension(List<string> hostnames)
+        public CertificateBuilder AddSubjectAltNameExtension(List<string> hostnames, List<string> ipAddresses)
         {
-            Asn1Encodable[] subjectAlternativeNames = hostnames.Select(x => new GeneralName(GeneralName.DnsName, x))
+            List<Asn1Encodable> subjectAlternativeNames = hostnames.Select(x => new GeneralName(GeneralName.DnsName, x))
                 .Select(x => x as Asn1Encodable)
-                .ToArray();
-            var subjectAlternativeNamesExtension = new DerSequence(subjectAlternativeNames);
+                .ToList();
+
+            ipAddresses.Select(x => new GeneralName(GeneralName.IPAddress, x))
+                .Select(x => x as Asn1Encodable)
+                .ToList()
+                .ForEach(x => subjectAlternativeNames.Add(x));
+
+
+            var subjectAlternativeNamesExtension = new DerSequence(subjectAlternativeNames.ToArray());
             certificateGenerator.AddExtension(X509Extensions.SubjectAlternativeName.Id, false, subjectAlternativeNamesExtension);
 
             return this;
@@ -75,6 +83,8 @@ namespace TestAuthority.Web.X509
             certificateGenerator.SetSubjectDN(Subject.ToX509Name());
             certificateGenerator.SetPublicKey(keyPair.Public);
 
+            certificateGenerator.AddExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.CrlSign | KeyUsage.KeyCertSign));
+
             certificateGenerator.AddExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(keyPair.Public));
             certificateGenerator.AddExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true));
             certificateGenerator.AddExtension(X509Extensions.AuthorityKeyIdentifier, true, new AuthorityKeyIdentifierStructure(keyPair.Public));
@@ -86,6 +96,13 @@ namespace TestAuthority.Web.X509
             var x509 = new X509Certificate2(certificate.GetEncoded());
             byte[] result = ConvertToPfx(x509, (RsaPrivateCrtKeyParameters)keyPair.Private, pfxPassword);
             return result;
+        }
+
+        public CertificateBuilder SetExtendedKeyUsage(params KeyPurposeID[] keyPurposeIds)
+        {
+            var extendedKeyUsage = new ExtendedKeyUsage(keyPurposeIds);
+            certificateGenerator.AddExtension(X509Extensions.ExtendedKeyUsage, false, extendedKeyUsage);
+            return this;
         }
 
         public CertificateBuilder SetIssuer(X509NameWrapper subjectDn)
@@ -121,10 +138,12 @@ namespace TestAuthority.Web.X509
             var certificateEntry = new X509CertificateEntry(cert);
 
             store.SetCertificateEntry(friendlyName, certificateEntry);
-            store.SetKeyEntry(friendlyName, new AsymmetricKeyEntry(rsaparams), new[]
-            {
-                certificateEntry
-            });
+            store.SetKeyEntry(friendlyName,
+                new AsymmetricKeyEntry(rsaparams),
+                new[]
+                {
+                    certificateEntry
+                });
 
             using (var stream = new MemoryStream())
             {
