@@ -10,4 +10,4 @@ Issue certificate for example.com
 
 Get root certificate
 
-http://localhost:5000/api/certificate/root
+`http://localhost:5000/api/certificate/root`
