@@ -10,39 +10,48 @@ using TestAuthority.Web.X509;
 
 namespace TestAuthority.Web.Actors
 {
-    public class SslCertificateActor : IActor
+    /// <summary>
+    /// Actor that issues certificates.
+    /// </summary>
+    public class EndpointCertificateIssueActor : IActor
     {
         private const string DefaultPassword = "123123123";
-        private const string SubjectName = "TestAuthority";
-        private readonly ILogger<SslCertificateActor> logger;
-        private readonly RootCertificateManager rootCertificateManager;
+        
+        private readonly ILogger<EndpointCertificateIssueActor> logger;
+        private readonly ActorManager actorManager;
 
         /// <summary>
         /// Ctor.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="rootCertificateManager">Root certificate manager.</param>
-        public SslCertificateActor(ILogger<SslCertificateActor> logger, RootCertificateManager rootCertificateManager)
+        /// <param name="actorManager"><see cref="ActorManager"/>.</param>
+        public EndpointCertificateIssueActor(ILogger<EndpointCertificateIssueActor> logger, ActorManager actorManager)
         {
             this.logger = logger;
-            this.rootCertificateManager = rootCertificateManager;
+            this.actorManager = actorManager;
 
-            logger.LogDebug("Actor created @{actorName}", GetType().Name);
+            logger.LogDebug("Actor created {actorName}", GetType().Name);
         }
 
-        public Task ReceiveAsync(IContext context)
+        /// <summary>
+        /// Receive method.
+        /// </summary>
+        /// <param name="context">Context.</param>
+        /// <returns>Task result.</returns>
+        public async Task ReceiveAsync(IContext context)
         {
             switch (context.Message)
             {
                 case IssueSslCertificateRequest request:
-                    byte[] rawData = IssueCertificate(request);
+
+
+                    byte[] rawData = await IssueCertificate(request);
                     context.Respond(new IssueSslCertificateResponse { RawData = rawData, Filename = "cert.pfx" });
-                    return Actor.Done;
+                    return;
             }
-            return Actor.Done;
         }
 
-        private byte[] IssueCertificate(IssueSslCertificateRequest request)
+        private async Task<byte[]> IssueCertificate(IssueSslCertificateRequest request)
         {
             var hostnames = new List<string>();
             if (request.IncludeLocalhost)
@@ -52,13 +61,16 @@ namespace TestAuthority.Web.Actors
             logger.LogInformation($"Issue certificate request for {request.SubjectCommonName}");
             hostnames.AddRange(request.Hostnames.Select(x => x.ToLowerInvariant()));
 
+            var certificateWithKey = await actorManager.GetActor<RootCertificateProviderActor>()
+                .RequestAsync<GetRootCertificateResponse>(new GetRootCertificateRequest());
+
             byte[] certificate = new CertificateBuilder()
                 .SetNotBefore(request.NotBefore)
                 .SetNotAfter(request.NotAfter)
                 .SetSubject(new X509NameWrapper().Add(X509Name.CN, request.SubjectCommonName))
                 .AddSubjectAltNameExtension(hostnames, request.IpAddress)
                 .SetExtendedKeyUsage(KeyPurposeID.IdKPServerAuth, KeyPurposeID.IdKPClientAuth)
-                .GenerateCertificate(rootCertificateManager.GetRootCertificate(SubjectName), DefaultPassword);
+                .GenerateCertificate(certificateWithKey.Certificate, DefaultPassword);
 
             return certificate;
         }

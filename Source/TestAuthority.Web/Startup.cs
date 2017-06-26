@@ -53,7 +53,7 @@ namespace TestAuthority.Web
 
         private static void RegisterActors(IServiceCollection services)
         {
-            services.AddProtoActor(x => { x.RegisterProps<SslCertificateActor>(props => props); });
+            services.AddProtoActor(x => { x.RegisterProps<EndpointCertificateIssueActor>(props => props); });
         }
     }
 }
