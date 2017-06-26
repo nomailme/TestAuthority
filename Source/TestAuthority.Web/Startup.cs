@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
 using Proto;
 using TestAuthority.Web.Actors;
 using TestAuthority.Web.X509;
@@ -28,7 +27,6 @@ namespace TestAuthority.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddNLog();
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
@@ -53,7 +51,11 @@ namespace TestAuthority.Web
 
         private static void RegisterActors(IServiceCollection services)
         {
-            services.AddProtoActor(x => { x.RegisterProps<EndpointCertificateIssueActor>(props => props); });
+            services.AddProtoActor(x =>
+            {
+                x.RegisterProps<EndpointCertificateIssueActor>(props => props);
+                x.RegisterProps<RootCertificateProviderActor>(props => props);
+            });
         }
     }
 }
