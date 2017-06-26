@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Asn1.X509;
 using Proto;
 using TestAuthority.Web.Actors.Message;
 using TestAuthority.Web.X509;
@@ -16,9 +15,9 @@ namespace TestAuthority.Web.Actors
     public class EndpointCertificateIssueActor : IActor
     {
         private const string DefaultPassword = "123123123";
-        
-        private readonly ILogger<EndpointCertificateIssueActor> logger;
         private readonly ActorManager actorManager;
+
+        private readonly ILogger<EndpointCertificateIssueActor> logger;
 
         /// <summary>
         /// Ctor.
@@ -42,16 +41,14 @@ namespace TestAuthority.Web.Actors
         {
             switch (context.Message)
             {
-                case IssueSslCertificateRequest request:
-
-
+                case EndpointCertificateRequest request:
                     byte[] rawData = await IssueCertificate(request);
-                    context.Respond(new IssueSslCertificateResponse { RawData = rawData, Filename = "cert.pfx" });
+                    context.Respond(new EndpointCertificateResponse { RawData = rawData, Filename = "cert.pfx" });
                     return;
             }
         }
 
-        private async Task<byte[]> IssueCertificate(IssueSslCertificateRequest request)
+        private async Task<byte[]> IssueCertificate(EndpointCertificateRequest request)
         {
             var hostnames = new List<string>();
             if (request.IncludeLocalhost)
@@ -61,15 +58,15 @@ namespace TestAuthority.Web.Actors
             logger.LogInformation($"Issue certificate request for {request.SubjectCommonName}");
             hostnames.AddRange(request.Hostnames.Select(x => x.ToLowerInvariant()));
 
-            var certificateWithKey = await actorManager.GetActor<RootCertificateProviderActor>()
+            GetRootCertificateResponse certificateWithKey = await actorManager.GetActor<RootCertificateProviderActor>()
                 .RequestAsync<GetRootCertificateResponse>(new GetRootCertificateRequest());
 
             byte[] certificate = new CertificateBuilder()
                 .SetNotBefore(request.NotBefore)
                 .SetNotAfter(request.NotAfter)
-                .SetSubject(new X509NameWrapper().Add(X509Name.CN, request.SubjectCommonName))
+                .SetSubject(new X509NameWrapper().AddCommonName(request.SubjectCommonName))
                 .AddSubjectAltNameExtension(hostnames, request.IpAddress)
-                .SetExtendedKeyUsage(KeyPurposeID.IdKPServerAuth, KeyPurposeID.IdKPClientAuth)
+                .SetExtendedKeyUsage(new ExtendedKeyUsageWrapper().AddClientAuthentication().AddClientAuthentication())
                 .GenerateCertificate(certificateWithKey.Certificate, DefaultPassword);
 
             return certificate;

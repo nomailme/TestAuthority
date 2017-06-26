@@ -6,7 +6,7 @@ namespace TestAuthority.Web.Actors.Message
     /// <summary>
     /// Request.
     /// </summary>
-    public class IssueSslCertificateRequest
+    public class EndpointCertificateRequest
     {
         private string password = "123123123";
 

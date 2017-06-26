@@ -16,6 +16,12 @@ namespace TestAuthority.Web.X509
             return this;
         }
 
+        public X509NameWrapper AddCommonName(string value)
+        {
+            components.Add(X509Name.CN, value);
+            return this;
+        }
+
         public X509Name ToX509Name()
         {
             DerObjectIdentifier[] keys = components.Keys.ToArray();

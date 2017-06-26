@@ -7,7 +7,7 @@ namespace TestAuthority.Web.Actors.Message
     /// <summary>
     /// Response.
     /// </summary>
-    public class IssueSslCertificateResponse
+    public class EndpointCertificateResponse
     {
 
         /// <summary>

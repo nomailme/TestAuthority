@@ -96,9 +96,9 @@ namespace TestAuthority.Web.X509
             return result;
         }
 
-        public CertificateBuilder SetExtendedKeyUsage(params KeyPurposeID[] keyPurposeIds)
+        public CertificateBuilder SetExtendedKeyUsage(ExtendedKeyUsageWrapper wrapper)
         {
-            var extendedKeyUsage = new ExtendedKeyUsage(keyPurposeIds);
+            var extendedKeyUsage = new ExtendedKeyUsage(wrapper.GetKeyUsages());
             certificateGenerator.AddExtension(X509Extensions.ExtendedKeyUsage, false, extendedKeyUsage);
             return this;
         }

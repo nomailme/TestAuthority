@@ -35,14 +35,15 @@ namespace TestAuthority.Web.Controllers
         [HttpGet]
         public async Task<FileResult> Get(string password, string[] hostname, string[] ipAddress)
         {
-            var request = new IssueSslCertificateRequest
+            var request = new EndpointCertificateRequest
             {
                 Hostnames = hostname.ToList(),
                 IpAddress = ipAddress.ToList(),
                 IncludeLocalhost = true,
                 Password = password
             };
-            IssueSslCertificateResponse response = await actorManager.GetActor<EndpointCertificateIssueActor>().RequestAsync<IssueSslCertificateResponse>(request);
+            EndpointCertificateResponse response = await actorManager.GetActor<EndpointCertificateIssueActor>()
+                .RequestAsync<EndpointCertificateResponse>(request);
 
             return File(response.RawData, MediaTypeNames.Application.Octet, response.Filename);
         }
