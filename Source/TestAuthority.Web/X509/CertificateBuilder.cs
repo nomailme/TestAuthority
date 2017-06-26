@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using NLog;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
@@ -50,7 +49,6 @@ namespace TestAuthority.Web.X509
                 .Select(x => x as Asn1Encodable)
                 .ToList()
                 .ForEach(x => subjectAlternativeNames.Add(x));
-
 
             var subjectAlternativeNamesExtension = new DerSequence(subjectAlternativeNames.ToArray());
             certificateGenerator.AddExtension(X509Extensions.SubjectAlternativeName.Id, false, subjectAlternativeNamesExtension);

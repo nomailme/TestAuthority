@@ -17,7 +17,7 @@ namespace TestAuthority.Web
             IWebHost host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseUrls("http://*:80")
+                .UseUrls("http://*:5003")
                 .UseIISIntegration()
                 .UseConfiguration(config)
                 .UseStartup<Startup>()

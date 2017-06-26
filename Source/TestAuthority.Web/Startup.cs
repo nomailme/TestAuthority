@@ -5,6 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
+using Proto;
+using TestAuthority.Web.Actors;
 using TestAuthority.Web.X509;
 
 namespace TestAuthority.Web
@@ -30,6 +32,7 @@ namespace TestAuthority.Web
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
+            Log.SetLoggerFactory(loggerFactory);
             app.UseMvc();
             app.UseSwagger();
             app.UseSwaggerUi();
@@ -41,8 +44,16 @@ namespace TestAuthority.Web
             services.AddSingleton<RootCertificateManager>();
             services.AddSwaggerGen();
 
+            RegisterActors(services);
+            services.AddTransient<ActorManager>();
+
             // Add framework services.
             services.AddMvc();
+        }
+
+        private static void RegisterActors(IServiceCollection services)
+        {
+            services.AddProtoActor(x => { x.RegisterProps<SslCertificateActor>(props => props); });
         }
     }
 }
