@@ -1,5 +1,7 @@
 # TestAuthority
 
+[![Build status](https://ci.appveyor.com/api/projects/status/9xmg595d0ps2r0uw?svg=true)](https://ci.appveyor.com/project/nomailme/testauthority)
+
 Provides an easy way to issue SSL certificate for a specific host.
 
 # Usage
