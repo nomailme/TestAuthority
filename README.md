@@ -14,8 +14,12 @@ Get root certificate
 
 `http://localhost:5000/api/certificate/root`
 
-# Swagger enabled
+# Swagger enabled (WebUI)
 
 You can use swagger for simple and explicit certificate issue.
 
 `http://localhost:5000/swagger`
+
+# Additional info
+
+Docker file included but is not complete at the moment
