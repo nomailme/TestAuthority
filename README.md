@@ -13,3 +13,9 @@ Issue certificate for example.com
 Get root certificate
 
 `http://localhost:5000/api/certificate/root`
+
+# Swagger enabled
+
+You can use swagger for simple and explicit certificate issue.
+
+`http://localhost:5000/swagger`
