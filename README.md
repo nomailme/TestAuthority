@@ -4,6 +4,15 @@
 
 Provides an easy way to issue SSL certificate for a specific host.
 
+# Quickstart
+
+## Requirements
+
+* .NET Core 2.1 https://www.microsoft.com/net/download
+
+To start Certificate Authority  
+`dotnet TestAuthority.dll`
+
 # Usage
 
 Issue certificate for example.com
