@@ -25,7 +25,7 @@ Get root certificate
 
 # Docker
 
-https://hub.docker.com/nomail/test-authority/
+https://hub.docker.com/r/nomail/test-authority/
 
 # Swagger enabled (WebUI)
 
