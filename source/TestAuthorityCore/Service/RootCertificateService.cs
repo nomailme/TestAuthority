@@ -93,7 +93,7 @@ namespace TestAuthorityCore.Service
 
         private static string GetRootCertificatePath()
         {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TestAuthority", RootCertificateName);
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "test-authority", RootCertificateName);
         }
 
         private byte[] GenerateRootCertificate()

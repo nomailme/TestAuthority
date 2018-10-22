@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Swagger;
 using TestAuthorityCore.Service;
+using TestAuthorityCore.Swagger;
 using TestAuthorityCore.X509;
 
 namespace TestAuthorityCore
@@ -41,7 +42,11 @@ namespace TestAuthorityCore
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddSwaggerGen(config => config.SwaggerDoc("v1", new Info { Title = "Personal Signing Center", Version = "v2" }));
+            services.AddSwaggerGen(config =>
+            {
+                config.SwaggerDoc("v1", new Info { Title = "Personal Signing Center", Version = "v2" });
+                config.OperationFilter<FormFileSwaggerFilter>();
+            });
             services.AddLogging();
             services.AddSingleton<RootCertificateService>();
             services.AddSingleton<RandomService>();
