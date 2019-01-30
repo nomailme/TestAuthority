@@ -19,7 +19,19 @@ namespace TestAuthorityCore.Controllers
     [Route("api/tools")]
     public class CertificateTools : Controller
     {
-        [HttpPost("to-pfx")]
+        [HttpPost("der-to-pem")]
+        public IActionResult ConvertCertificateToPem([FromForm] IFormFile file, string certificateName = "certificate.crt")
+        {
+            using (var streamReader = new StreamReader(file.OpenReadStream()))
+            {
+                X509Certificate certificate = new X509CertificateParser().ReadCertificate(streamReader.BaseStream);
+                string certificateString = ConvertCertificateToPem(certificate);
+                byte[] result = Encoding.ASCII.GetBytes(certificateString);
+                return File(result, MediaTypeNames.Application.Octet, certificateName);
+            }
+        }
+
+        [HttpPost("pem-to-pfx")]
         public IActionResult ConvertToPfx([FromForm] IFormFile pemCertificate, [FromForm] IFormFile pemKey, string password, string filename = "certificate.pfx")
         {
             byte[] certificate;
@@ -43,44 +55,6 @@ namespace TestAuthorityCore.Controllers
             return File(result, MediaTypeNames.Application.Octet, filename);
         }
 
-        private byte[] ConvertToPfxImpl(byte[] certificate, byte[] privateKey, string password)
-        {
-            AsymmetricCipherKeyPair asymmetricCipherKeyPair = null;
-            var certificateEntry = new X509CertificateEntry[1];
-
-            Pkcs12Store store = new Pkcs12StoreBuilder().Build();
-
-            using (var stream = new MemoryStream(privateKey))
-            {
-                using (var streamReader = new StreamReader(stream))
-                {
-                    object value = new PemReader(streamReader).ReadObject();
-                    if (value is AsymmetricCipherKeyPair pair)
-                    {
-                        asymmetricCipherKeyPair = pair;
-                    }
-                }
-            }
-
-            using (var stream = new MemoryStream(certificate))
-            {
-                using (var streamReader = new StreamReader(stream))
-                {
-                    object value = new PemReader(streamReader).ReadObject();
-                    if (value is X509Certificate x509Certificate)
-                    {
-                        certificateEntry[0] = new X509CertificateEntry(x509Certificate);
-                    }
-                }
-            }
-
-            store.SetKeyEntry("certificate", new AsymmetricKeyEntry(asymmetricCipherKeyPair.Private), certificateEntry);
-            var result = new MemoryStream();
-            store.Save(result, password.ToCharArray(), new SecureRandom());
-            result.Position = 0;
-            return result.ToArray();
-        }
-
         [HttpPost("pfx-to-certificate")]
         public IActionResult GetCertificateFromPfx([FromForm] IFormFile file, string password, string certificateName = "certificate.crt")
         {
@@ -95,7 +69,7 @@ namespace TestAuthorityCore.Controllers
 
                 X509CertificateEntry certificateEntry = store.GetCertificate(firstAlias);
 
-                string certificateString = ConvertCertificateToPem(certificateEntry);
+                string certificateString = ConvertCertificateToPem(certificateEntry.Certificate);
                 byte[] result = Encoding.ASCII.GetBytes(certificateString);
                 return File(result, MediaTypeNames.Application.Octet, certificateName);
             }
@@ -122,9 +96,9 @@ namespace TestAuthorityCore.Controllers
             }
         }
 
-        private static string ConvertCertificateToPem(X509CertificateEntry certificateEntry)
+        private static string ConvertCertificateToPem(X509Certificate certificate)
         {
-            var generator = new MiscPemGenerator(certificateEntry.Certificate);
+            var generator = new MiscPemGenerator(certificate);
 
             string certificateString;
             using (var textWriter = new StringWriter())
@@ -173,6 +147,44 @@ namespace TestAuthorityCore.Controllers
             }
 
             return certificateString;
+        }
+
+        private byte[] ConvertToPfxImpl(byte[] certificate, byte[] privateKey, string password)
+        {
+            AsymmetricCipherKeyPair asymmetricCipherKeyPair = null;
+            var certificateEntry = new X509CertificateEntry[1];
+
+            Pkcs12Store store = new Pkcs12StoreBuilder().Build();
+
+            using (var stream = new MemoryStream(privateKey))
+            {
+                using (var streamReader = new StreamReader(stream))
+                {
+                    object value = new PemReader(streamReader).ReadObject();
+                    if (value is AsymmetricCipherKeyPair pair)
+                    {
+                        asymmetricCipherKeyPair = pair;
+                    }
+                }
+            }
+
+            using (var stream = new MemoryStream(certificate))
+            {
+                using (var streamReader = new StreamReader(stream))
+                {
+                    object value = new PemReader(streamReader).ReadObject();
+                    if (value is X509Certificate x509Certificate)
+                    {
+                        certificateEntry[0] = new X509CertificateEntry(x509Certificate);
+                    }
+                }
+            }
+
+            store.SetKeyEntry("certificate", new AsymmetricKeyEntry(asymmetricCipherKeyPair.Private), certificateEntry);
+            var result = new MemoryStream();
+            store.Save(result, password.ToCharArray(), new SecureRandom());
+            result.Position = 0;
+            return result.ToArray();
         }
     }
 }
