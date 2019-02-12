@@ -30,9 +30,9 @@ https://hub.docker.com/r/nomail/test-authority/
 
 # Swagger enabled (WebUI)
 
-You can use swagger for simple and explicit certificate issue.
+You can use swagger UI for simple and explicit certificate issue.
 
-`http://localhost:5000/swagger`
+`http://localhost:5000`
 
 # Additional info
 

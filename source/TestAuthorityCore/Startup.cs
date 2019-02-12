@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -34,7 +35,11 @@ namespace TestAuthorityCore
             app.UseMvc();
 
             app.UseSwagger();
-            app.UseSwaggerUI(config => config.SwaggerEndpoint("/swagger/v1/swagger.json", "Personal Signing Center"));
+            app.UseSwaggerUI(config =>
+            {
+                config.SwaggerEndpoint("/swagger/v1/swagger.json", "Personal Signing Center");
+                config.RoutePrefix = "";
+            });
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
