@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 using TestAuthorityCore.Service;
 using TestAuthorityCore.Swagger;
@@ -23,15 +24,8 @@ namespace TestAuthorityCore
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
             app.UseMvc();
 
             app.UseSwagger();
@@ -45,12 +39,13 @@ namespace TestAuthorityCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc(x => x.EnableEndpointRouting = false)
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddSwaggerGen(config =>
             {
-                config.SwaggerDoc("v1", new Info { Title = "Personal Signing Center", Version = "v2" });
-                config.OperationFilter<FormFileSwaggerFilter>();
+                config.SwaggerDoc("v1", new OpenApiInfo { Title = "Personal Signing Center", Version = "v1" });
+                config.OperationFilter<AddFileParamTypesOperationFilter>();
             });
             services.AddLogging();
             services.AddSingleton<RootCertificateService>();

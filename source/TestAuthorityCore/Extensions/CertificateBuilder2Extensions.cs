@@ -43,6 +43,12 @@ namespace TestAuthorityCore.Extensions
             return builder;
         }
 
+        public static ICertificateBuilder WithSerialNumber(this ICertificateBuilder builder)
+        {
+            builder.AddExtension(X509Extensions.KeyUsage.Id, true, new KeyUsage(KeyUsage.CrlSign | KeyUsage.KeyCertSign | KeyUsage.DigitalSignature | KeyUsage.NonRepudiation));
+            return builder;
+        }
+
         public static ICertificateBuilder WithSubjectAlternativeName(this ICertificateBuilder builder, List<string> hostnames = null, List<string> ipAddresses = null)
         {
             var result = new List<Asn1Encodable>();

@@ -16,15 +16,13 @@ namespace TestAuthorityCore.Controllers
     public class DerToolsController : Controller
     {
         [HttpPost("der-to-pem")]
-        public IActionResult ConvertCertificateToPem([FromForm] IFormFile file, string certificateName = "certificate.crt")
+        public IActionResult ConvertCertificateToPem(IFormFile request, string certificateName = "certificate.crt")
         {
-            using (var streamReader = new StreamReader(file.OpenReadStream()))
-            {
-                X509Certificate certificate = new X509CertificateParser().ReadCertificate(streamReader.BaseStream);
-                string certificateString = ConvertCertificateToPem(certificate);
-                byte[] result = Encoding.ASCII.GetBytes(certificateString);
-                return File(result, MediaTypeNames.Application.Octet, certificateName);
-            }
+            using var streamReader = new StreamReader(request.OpenReadStream());
+            X509Certificate certificate = new X509CertificateParser().ReadCertificate(streamReader.BaseStream);
+            string certificateString = ConvertCertificateToPem(certificate);
+            byte[] result = Encoding.ASCII.GetBytes(certificateString);
+            return File(result, MediaTypeNames.Application.Octet, certificateName);
         }
 
         private static string ConvertCertificateToPem(X509Certificate certificate)

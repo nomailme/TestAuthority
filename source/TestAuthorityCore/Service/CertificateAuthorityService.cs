@@ -68,12 +68,10 @@ namespace TestAuthorityCore.Service
                     certificateEntry
                 });
 
-            using (var stream = new MemoryStream())
-            {
-                store.Save(stream, pfxPassword.ToCharArray(), random);
+            using var stream = new MemoryStream();
+            store.Save(stream, pfxPassword.ToCharArray(), random);
 
-                return stream.ToArray();
-            }
+            return stream.ToArray();
         }
     }
 }

@@ -23,7 +23,7 @@ namespace TestAuthorityCore.Controllers
         /// <param name="filename">Output filename.</param>
         /// <returns>Certificate with private key in Pkcs12 container.</returns>
         [HttpPost("from-pem")]
-        public IActionResult ConvertToPfx([FromForm] IFormFile pemCertificate, [FromForm] IFormFile pemKey, string password, string filename = "certificate.pfx")
+        public IActionResult ConvertToPfx(IFormFile pemCertificate, IFormFile pemKey, string password, string filename = "certificate.pfx")
         {
             byte[] certificate = ToArray(pemCertificate.OpenReadStream());
             byte[] key = ToArray(pemKey.OpenReadStream());
@@ -34,30 +34,24 @@ namespace TestAuthorityCore.Controllers
 
         private static byte[] ToArray(Stream stream)
         {
-            using (var memoryStream = new MemoryStream())
-            {
-                stream.CopyTo(memoryStream);
-                memoryStream.Position = 0;
-                return memoryStream.ToArray();
-            }
+            using var memoryStream = new MemoryStream();
+            stream.CopyTo(memoryStream);
+            memoryStream.Position = 0;
+            return memoryStream.ToArray();
         }
 
         private static TOutput ToCrypto<TOutput>(byte[] input)
             where TOutput : class
         {
-            using (var stream = new MemoryStream(input))
+            using var stream = new MemoryStream(input);
+            using var streamReader = new StreamReader(stream);
+            object value = new PemReader(streamReader).ReadObject();
+            if (value is TOutput result)
             {
-                using (var streamReader = new StreamReader(stream))
-                {
-                    object value = new PemReader(streamReader).ReadObject();
-                    if (value is TOutput result)
-                    {
-                        return result;
-                    }
-
-                    return null;
-                }
+                return result;
             }
+
+            return null;
         }
 
         private byte[] ConvertToPfxImpl(byte[] certificate, byte[] privateKey, string password)

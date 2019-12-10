@@ -1,95 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Abstractions;
-using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace TestAuthorityCore.Swagger
 {
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class AddSwaggerFileUploadButtonAttribute : Attribute
+    {
+    }
+
     /// <summary>
     /// Filter to enable handling file upload in swagger
     /// </summary>
-    public class FormFileSwaggerFilter : IOperationFilter
+    public class AddFileParamTypesOperationFilter : IOperationFilter
     {
-        private const string formDataMimeType = "multipart/form-data";
-
-        private static readonly string[] formFilePropertyNames =
-            typeof(IFormFile).GetTypeInfo().DeclaredProperties.Select(p => p.Name).ToArray();
-
-        /// <summary>
-        /// Apply operation.
-        /// </summary>
-        /// <param name="operation">Operation.</param>
-        /// <param name="context">Context.</param>
-        public void Apply(Operation operation, OperationFilterContext context)
+        private static readonly string[] fileParameters = new[] { "ContentType", "ContentDisposition", "Headers", "Length", "Name", "FileName" };
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            IList<IParameter> parameters = operation.Parameters;
-            if (parameters == null || parameters.Count == 0)
+            var operationHasFileUploadButton = context.MethodInfo.GetCustomAttributes(true).OfType<AddSwaggerFileUploadButtonAttribute>().Any();
+
+            if (!operationHasFileUploadButton)
             {
                 return;
             }
-
-            var formFileParameterNames = new List<string>();
-            var formFileSubParameterNames = new List<string>();
-
-            foreach (ParameterDescriptor actionParameter in context.ApiDescription.ActionDescriptor.Parameters)
+            RemoveExistingFileParameters(operation.Parameters);
+            operation.RequestBody = new OpenApiRequestBody()
             {
-                string[] properties =
-                    actionParameter.ParameterType.GetProperties()
-                        .Where(p => p.PropertyType == typeof(IFormFile))
-                        .Select(p => p.Name)
-                        .ToArray();
+                Content =
+                    {
+                        ["multipart/form-data"] = new OpenApiMediaType()
+                        {
+                            Schema = new OpenApiSchema()
+                            {
+                                Type = "object",
+                                Properties =
+                                {
+                                    ["file"] = new OpenApiSchema()
+                                    {
+                                        Description = "Select file", Type = "string", Format = "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+            };
 
-                if (properties.Length != 0)
-                {
-                    formFileParameterNames.AddRange(properties);
-                    formFileSubParameterNames.AddRange(properties);
-                    continue;
-                }
+        }
 
-                if (actionParameter.ParameterType != typeof(IFormFile))
-                {
-                    continue;
-                }
-
-                formFileParameterNames.Add(actionParameter.Name);
-            }
-
-            if (!formFileParameterNames.Any())
+        private void RemoveExistingFileParameters(IList<OpenApiParameter> operationParameters)
+        {
+            foreach (var parameter in operationParameters.Where(p => p.In == 0 && fileParameters.Contains(p.Name)).ToList())
             {
-                return;
-            }
-
-            IList<string> consumes = operation.Consumes;
-            consumes.Clear();
-            consumes.Add(formDataMimeType);
-
-            foreach (IParameter parameter in parameters.ToArray())
-            {
-                if (!(parameter is NonBodyParameter) || parameter.In != "formData")
-                {
-                    continue;
-                }
-
-                if (formFileSubParameterNames.Any(p => parameter.Name.StartsWith(p + "."))
-                    || formFilePropertyNames.Contains(parameter.Name))
-                {
-                    parameters.Remove(parameter);
-                }
-            }
-
-            foreach (string formFileParameter in formFileParameterNames)
-            {
-                parameters.Add(new NonBodyParameter()
-                {
-                    Name = formFileParameter,
-                    Type = "file",
-                    In = "formData"
-                });
+                operationParameters.Remove(parameter);
             }
         }
     }
+
 }

@@ -43,21 +43,19 @@ namespace TestAuthorityCore.Service
 
         private static CertificateWithKey Convert(byte[] pfxCertificate)
         {
-            using (var stream = new MemoryStream(pfxCertificate))
-            {
-                var store = new Pkcs12Store();
-                store.Load(stream, Password.ToCharArray());
-                string alias = store.Aliases.OfType<string>().Single();
-                X509CertificateEntry certificateEntry = store.GetCertificate(alias);
-                AsymmetricKeyEntry keyEntry = store.GetKey(alias);
+            using var stream = new MemoryStream(pfxCertificate);
+            var store = new Pkcs12Store();
+            store.Load(stream, Password.ToCharArray());
+            string alias = store.Aliases.OfType<string>().Single();
+            X509CertificateEntry certificateEntry = store.GetCertificate(alias);
+            AsymmetricKeyEntry keyEntry = store.GetKey(alias);
 
-                var result = new CertificateWithKey
-                {
-                    Certificate = new X509Certificate2(certificateEntry.Certificate.GetEncoded()),
-                    KeyPair = new AsymmetricCipherKeyPair(certificateEntry.Certificate.GetPublicKey(), keyEntry.Key)
-                };
-                return result;
-            }
+            var result = new CertificateWithKey
+            {
+                Certificate = new X509Certificate2(certificateEntry.Certificate.GetEncoded()),
+                KeyPair = new AsymmetricCipherKeyPair(certificateEntry.Certificate.GetPublicKey(), keyEntry.Key)
+            };
+            return result;
         }
 
         private static byte[] ConvertToPfx(X509Certificate2 x509, RsaPrivateCrtKeyParameters rsaParams, string pfxPassword)
@@ -76,12 +74,10 @@ namespace TestAuthorityCore.Service
                     certificateEntry
                 });
 
-            using (var stream = new MemoryStream())
-            {
-                store.Save(stream, pfxPassword.ToCharArray(), random);
+            using var stream = new MemoryStream();
+            store.Save(stream, pfxPassword.ToCharArray(), random);
 
-                return stream.ToArray();
-            }
+            return stream.ToArray();
         }
 
         private static SecureRandom GenerateRandom()
