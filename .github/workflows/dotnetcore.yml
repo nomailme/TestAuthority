@@ -13,5 +13,12 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.100
-    - name: Build with dotnet
-      run: dotnet build --configuration Release
+    - name: Publish Docker Action
+      uses: jerray/publish-docker-action@v1.0.3
+      with:
+      # Username used to login docker registry
+        username: ${{ secrets.dockerHubUsername }}
+        # Password used to login docker registry
+        password: ${{ secrets.dockerHubSecret }}
+        # Docker build context
+        path: source/TestAuthorityCore       
