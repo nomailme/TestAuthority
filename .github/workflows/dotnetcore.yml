@@ -16,10 +16,11 @@ jobs:
     - name: Publish Docker Action
       uses: jerray/publish-docker-action@v1.0.3
       with:
-      # Username used to login docker registry
+        # Username used to login docker registry
         username: ${{ secrets.dockerHubUsername }}
         # Password used to login docker registry
         password: ${{ secrets.dockerHubSecret }}
         # Docker build context
         path: source/TestAuthorityCore
+        file: source/TestAuthorityCore/Dockerfile
         repository: nomail/test-authority
