@@ -9,7 +9,7 @@ Contains tools for conversion to/from PEM format from/to PFX (PKCS12)
 
 ## Requirements
 
-* .NET Core 2.1 https://www.microsoft.com/net/download
+* .NET Core 3.1 https://www.microsoft.com/net/download
 
 To start Certificate Authority  
 `dotnet TestAuthority.dll`
