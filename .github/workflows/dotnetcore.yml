@@ -21,4 +21,5 @@ jobs:
         # Password used to login docker registry
         password: ${{ secrets.dockerHubSecret }}
         # Docker build context
-        path: source/TestAuthorityCore       
+        path: source/TestAuthorityCore
+        repository: nomail/test-authority
