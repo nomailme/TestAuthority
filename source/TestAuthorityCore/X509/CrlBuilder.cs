@@ -32,6 +32,8 @@ namespace TestAuthorityCore.X509
             crlGenerator.SetThisUpdate(DateTime.Now);
             crlGenerator.SetNextUpdate(DateTime.Now.AddYears(1));
 
+            crlGenerator.AddCrlEntry(BigInteger.One, DateTime.Now, CrlReason.PrivilegeWithdrawn);
+
             crlGenerator.AddExtension(X509Extensions.AuthorityKeyIdentifier,
                 false,
                 new AuthorityKeyIdentifierStructure(signer));
