@@ -16,6 +16,7 @@ namespace TestAuthorityCore.Service
     public class CertificateAuthorityService
     {
         private readonly Func<SecureRandom, CertificateWithKey, CertificateBuilder2> builderFactory;
+        private readonly Func<SecureRandom, CertificateWithKey, ICrlBuilder> crlBuilderFactory;
         private readonly RandomService randomService;
         private readonly CertificateWithKey SignerCertificate;
 
@@ -24,6 +25,15 @@ namespace TestAuthorityCore.Service
             SignerCertificate = signerCertificate;
             this.randomService = randomService;
             builderFactory = (random, issuer) => new CertificateBuilder2(random);
+            crlBuilderFactory = (random, issuer) => new CrlBuilder(random, issuer);
+        }
+
+        public byte[] GenerateCrl()
+        {
+            SecureRandom random = randomService.GenerateRandom();
+            ICrlBuilder crlBuilder = crlBuilderFactory(random, SignerCertificate);
+            var crl = crlBuilder.Generate();
+            return crl.GetEncoded();
         }
 
         public byte[] GenerateSslCertificate(PfxCertificateRequest request)
@@ -36,7 +46,8 @@ namespace TestAuthorityCore.Service
 
             AsymmetricCipherKeyPair keyPair = CertificateBuilder2.GenerateKeyPair(2048, random);
 
-            X509Name signerSubject = new X509CertificateParser().ReadCertificate(SignerCertificate.Certificate.RawData).IssuerDN;
+            X509Name signerSubject = new X509CertificateParser().ReadCertificate(SignerCertificate.Certificate.RawData)
+                .IssuerDN;
 
             CertificateWithKey certificate = builder.WithSubjectCommonName(request.CommonName)
                 .WithKeyPair(keyPair)

@@ -25,6 +25,17 @@ namespace TestAuthorityCore.Controllers
         {
             byte[] result = rootCertificateService.GetRootCertificate().Certificate.RawData;
             return File(result, MediaTypeNames.Application.Octet, "root.cer");
+        } 
+        
+        /// <summary>
+        /// Generate current Crl.
+        /// </summary>
+        /// <returns>Certificate.</returns>
+        [HttpGet("/api/certificate/crl")]
+        public IActionResult GetCrl()
+        {
+            byte[] result = service.GenerateCrl();
+            return File(result, MediaTypeNames.Application.Octet, "root.crl");
         }
 
         /// <summary>
