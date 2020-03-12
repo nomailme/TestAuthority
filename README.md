@@ -14,6 +14,10 @@ Contains tools for conversion to/from PEM format from/to PFX (PKCS12)
 To start Certificate Authority  
 `dotnet TestAuthority.dll`
 
+To start project in docker container
+`docker run -p 5000:80 -d nomail/test-authority:latest`
+`docker run -p 5000:80 -v /usr/share/test-authority:/usr/share/test-authority -d nomail/test-authority:latest`
+
 # Usage
 
 Issue certificate for example.com
