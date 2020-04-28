@@ -25,8 +25,8 @@ namespace TestAuthorityCore.Controllers
         {
             byte[] result = rootCertificateService.GetRootCertificate().Certificate.RawData;
             return File(result, MediaTypeNames.Application.Octet, "root.cer");
-        } 
-        
+        }
+
         /// <summary>
         /// Generate current Crl.
         /// </summary>
@@ -48,7 +48,7 @@ namespace TestAuthorityCore.Controllers
         /// <param name="filename"></param>
         /// <returns></returns>
         [HttpGet]
-        public IActionResult IssueCertificate([FromQuery] string commonName, [FromQuery] string password, [FromQuery] string[] hostname, [FromQuery] string[] ipAddress, [FromQuery] string filename = "certificate.pfx")
+        public IActionResult IssueCertificate([FromQuery] string commonName, [FromQuery] string password, [FromQuery] string[] hostname, [FromQuery] string[] ipAddress, [FromQuery] string filename = "certificate.pfx", [FromQuery] int validityInDays = 364)
         {
             if (hostname.IsNullOrEmpty())
             {
@@ -75,7 +75,8 @@ namespace TestAuthorityCore.Controllers
                 CommonName = commonName,
                 Hostnames = hostname.ToList(),
                 IpAddresses = ipAddress.ToList(),
-                Password = password
+                Password = password,
+                ValidtyInDays = validityInDays
             };
 
             byte[] certificate = service.GenerateSslCertificate(request);

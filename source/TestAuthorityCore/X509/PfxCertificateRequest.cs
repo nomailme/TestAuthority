@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace TestAuthorityCore.X509
 {
@@ -10,6 +9,9 @@ namespace TestAuthorityCore.X509
         public List<string> Hostnames { get; set; }
 
         public List<string> IpAddresses { get; set; }
+
         public string Password { get; set; }
+
+        public int ValidtyInDays { get; set; } = 364;
     }
 }

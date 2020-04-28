@@ -39,7 +39,7 @@ namespace TestAuthorityCore.Service
         public byte[] GenerateSslCertificate(PfxCertificateRequest request)
         {
             DateTimeOffset notBefore = DateTimeOffset.UtcNow.AddHours(-2);
-            DateTimeOffset notAfter = DateTimeOffset.UtcNow.AddYears(3);
+            DateTimeOffset notAfter = DateTimeOffset.UtcNow.AddDays(request.ValidtyInDays);
             SecureRandom random = randomService.GenerateRandom();
 
             CertificateBuilder2 builder = builderFactory(random, SignerCertificate);
