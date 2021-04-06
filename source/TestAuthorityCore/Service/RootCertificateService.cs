@@ -13,6 +13,9 @@ using X509Certificate = Org.BouncyCastle.X509.X509Certificate;
 
 namespace TestAuthorityCore.Service
 {
+    /// <summary>
+    /// Provides methods for root certificate management. 
+    /// </summary>
     public class RootCertificateService
     {
         private const int KeyStrength = 2048;
@@ -20,11 +23,18 @@ namespace TestAuthorityCore.Service
         private const string RootCertificateName = "Root.pfx";
         private readonly Func<SecureRandom, ICertificateBuilder> builderFactory;
 
+        /// <summary>
+        /// Ctor.
+        /// </summary>
         public RootCertificateService()
         {
             builderFactory = (random) => new CertificateBuilder2(random, KeyStrength);
         }
 
+        /// <summary>
+        /// Get root certificate.
+        /// </summary>
+        /// <returns>Root certificate.</returns>
         public CertificateWithKey GetRootCertificate()
         {
             string rootCertificatePath = GetRootCertificatePath();

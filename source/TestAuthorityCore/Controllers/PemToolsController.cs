@@ -10,8 +10,18 @@ using Org.BouncyCastle.Pkcs;
 
 namespace TestAuthorityCore.Controllers
 {
+    /// <summary>
+    /// Tools to work with Pem certificates.
+    /// </summary>
     public class PemToolsController : Controller
     {
+        /// <summary>
+        /// Convert pfx to pem certificate.
+        /// </summary>
+        /// <param name="request">Request.</param>
+        /// <param name="password">Pfx password.</param>
+        /// <param name="certificateName">Name of the output certificate.</param>
+        /// <returns>Certificate.</returns>
         [HttpPost("pfx-to-certificate")]
         public IActionResult GetCertificateFromPfx(IFormFile request, string password, string certificateName = "certificate.crt")
         {
@@ -30,6 +40,13 @@ namespace TestAuthorityCore.Controllers
             return File(result, MediaTypeNames.Application.Octet, certificateName);
         }
 
+        /// <summary>
+        /// Convert pfx to pem key.
+        /// </summary>
+        /// <param name="request">Request.</param>
+        /// <param name="password">Pfx password.</param>
+        /// <param name="filename">Name of the output key.</param>
+        /// <returns>Key.</returns>
         [HttpPost("pfx-to-key")]
         public IActionResult GetKeyFromPfx(IFormFile request, string password, string filename = "certificate.key")
         {

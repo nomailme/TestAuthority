@@ -11,6 +11,9 @@ using Org.BouncyCastle.X509;
 
 namespace TestAuthorityCore.Controllers
 {
+    /// <summary>
+    /// Provides API for pfx tooling.
+    /// </summary>
     [Route("api/pkcs12")]
     public class Pkcs12ToolsController : Controller
     {

@@ -5,8 +5,15 @@ using Serilog;
 
 namespace TestAuthorityCore
 {
+    /// <summary>
+    /// The one and only.
+    /// </summary>
     public class Program
     {
+        /// <summary>
+        /// The mainest of them all.
+        /// </summary>
+        /// <param name="args">Arguments.</param>
         public static void Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
@@ -29,6 +36,11 @@ namespace TestAuthorityCore
             }
         }
 
+        /// <summary>
+        /// Create a <seecref name="IWebHostBuilder"/>.
+        /// </summary>
+        /// <param name="args">Arguments</param>
+        /// <returns><seecref name="IWebHostBuilder"/></returns>
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseSerilog()

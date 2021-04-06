@@ -7,6 +7,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 namespace TestAuthorityCore.Swagger
 {
 
+    /// <summary>
+    /// AddSwaggerFileUploadButton.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class AddSwaggerFileUploadButtonAttribute : Attribute
     {
@@ -18,6 +21,12 @@ namespace TestAuthorityCore.Swagger
     public class AddFileParamTypesOperationFilter : IOperationFilter
     {
         private static readonly string[] fileParameters = new[] { "ContentType", "ContentDisposition", "Headers", "Length", "Name", "FileName" };
+
+        /// <summary>
+        /// Apply filter.
+        /// </summary>
+        /// <param name="operation"><seecref name="OpenApiOperation"/>.</param>
+        /// <param name="context"><seecref name="OperationFilterContext"/>.</param>
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             var operationHasFileUploadButton = context.MethodInfo.GetCustomAttributes(true).OfType<AddSwaggerFileUploadButtonAttribute>().Any();

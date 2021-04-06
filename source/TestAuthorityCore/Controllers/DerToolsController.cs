@@ -15,6 +15,12 @@ namespace TestAuthorityCore.Controllers
     [Route("api/tools")]
     public class DerToolsController : Controller
     {
+        /// <summary>
+        /// Convert certificate from DER to PEM encoding.`
+        /// </summary>
+        /// <param name="request">Request with certificate.</param>
+        /// <param name="certificateName">Output name of the certificate.</param>
+        /// <returns>Result of conversion.</returns>
         [HttpPost("der-to-pem")]
         public IActionResult ConvertCertificateToPem(IFormFile request, string certificateName = "certificate.crt")
         {

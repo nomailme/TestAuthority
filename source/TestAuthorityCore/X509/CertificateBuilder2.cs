@@ -14,6 +14,9 @@ using X509Certificate = Org.BouncyCastle.X509.X509Certificate;
 
 namespace TestAuthorityCore.X509
 {
+    /// <summary>
+    /// Certificate builder.
+    /// </summary>
     public class CertificateBuilder2 : ICertificateBuilder
     {
         private const string SignatureAlgorithm = "SHA256WithRSA";
@@ -21,6 +24,11 @@ namespace TestAuthorityCore.X509
         private readonly SecureRandom random;
         private AsymmetricCipherKeyPair keyPair;
 
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="random">Random value.</param>
+        /// <param name="keyStrength">Key strength.</param>
         public CertificateBuilder2(SecureRandom random, int keyStrength = 2048)
         {
             KeyStrength = keyStrength;
@@ -29,14 +37,19 @@ namespace TestAuthorityCore.X509
             certificateGenerator.SetSerialNumber(serialNumber);
         }
 
+        /// <inheritdoc/>
         public X509Name Issuer { get; set; }
 
+        /// <inheritdoc/>
         public int KeyStrength { get; }
 
+        /// <inheritdoc/>
         public AsymmetricKeyParameter PublicKeyInfo => keyPair.Public;
 
+        /// <inheritdoc/>
         public X509Name Subject { get; set; }
 
+        /// <inheritdoc/>
         public static AsymmetricCipherKeyPair GenerateKeyPair(int keyStrength, SecureRandom random)
         {
             var keyGenerationParameters = new KeyGenerationParameters(random, keyStrength);
@@ -46,17 +59,20 @@ namespace TestAuthorityCore.X509
             return subjectKeyPair;
         }
 
+        /// <inheritdoc/>
         public ICertificateBuilder AddExtension(string oid, bool isCritical, Asn1Encodable value)
         {
             certificateGenerator.AddExtension(oid, isCritical, value);
             return this;
         }
 
+        /// <inheritdoc/>
         public CertificateWithKey Generate()
         {
             return Generate(keyPair);
         }
 
+        /// <inheritdoc/>
         public CertificateWithKey Generate(AsymmetricCipherKeyPair signerKeyPair)
         {
             Validate();
@@ -76,6 +92,7 @@ namespace TestAuthorityCore.X509
             return result;
         }
 
+        /// <inheritdoc/>
         public ICertificateBuilder SetIssuer(X509Name issuer)
         {
             Issuer = issuer;
@@ -83,18 +100,21 @@ namespace TestAuthorityCore.X509
             return this;
         }
 
+        /// <inheritdoc/>
         public ICertificateBuilder SetNotAfter(DateTimeOffset notAfter)
         {
             certificateGenerator.SetNotAfter(notAfter.UtcDateTime);
             return this;
         }
 
+        /// <inheritdoc/>
         public ICertificateBuilder SetNotBefore(DateTimeOffset notBefore)
         {
             certificateGenerator.SetNotBefore(notBefore.UtcDateTime);
             return this;
         }
 
+        /// <inheritdoc/>
         public ICertificateBuilder SetSubject(X509Name subject)
         {
             Subject = subject;
@@ -102,6 +122,7 @@ namespace TestAuthorityCore.X509
             return this;
         }
 
+        /// <inheritdoc/>
         public ICertificateBuilder WithBasicConstraints(BasicConstrainsConstants constrains)
         {
             if (constrains == BasicConstrainsConstants.EndEntity)
@@ -114,6 +135,7 @@ namespace TestAuthorityCore.X509
             return this;
         }
 
+        /// <inheritdoc/>
         public ICertificateBuilder WithKeyPair(AsymmetricCipherKeyPair keyPair)
         {
             this.keyPair = keyPair;
