@@ -20,3 +20,4 @@ jobs:
         path: source/TestAuthorityCore
         file: source/TestAuthorityCore/Dockerfile
         repository: nomail/test-authority
+        auto_tag: true
