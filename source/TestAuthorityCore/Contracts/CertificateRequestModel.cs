@@ -50,7 +50,7 @@ namespace TestAuthorityCore.Contracts
         /// Output filename (without extension).
         /// </summary>
         [DefaultValue("certificate")]
-        public string Filename { get; set; }
+        public string Filename { get; set; } = "certificate";
 
         /// <summary>
         /// Certificate validity in days.
