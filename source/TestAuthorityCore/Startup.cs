@@ -4,11 +4,11 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using TestAuthorityCore.Filters;
 using TestAuthorityCore.Service;
 using TestAuthorityCore.Swagger;
 using TestAuthorityCore.X509;
@@ -55,15 +55,21 @@ namespace TestAuthorityCore
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc(x => x.EnableEndpointRouting = false)
+            services.AddControllers(x =>
+            {
+                x.EnableEndpointRouting = false;
+                x.Filters.Add<ValidationFilter>();
+            })
             .AddJsonOptions(x =>
             {
                 x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
                 x.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 x.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             })
-            .AddFluentValidation()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            .AddFluentValidation(config =>
+            {
+                config.RegisterValidatorsFromAssemblyContaining<Startup>();
+            });
 
             services.AddSwaggerGen(config =>
             {
@@ -75,7 +81,6 @@ namespace TestAuthorityCore
                     Contact = new OpenApiContact
                     {
                         Name = "Iskander Yarmukhametov",
-                        Email = "nomail86<at>gmail.com",
                         Url = new Uri("https://github.com/nomailme/TestAuthority")
                     }
                 });

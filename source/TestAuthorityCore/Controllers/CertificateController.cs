@@ -1,10 +1,8 @@
 ﻿using System;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
-using Nelibur.Sword.Extensions;
+using TestAuthorityCore.Contracts;
 using TestAuthorityCore.Service;
 using TestAuthorityCore.X509;
 
@@ -62,29 +60,9 @@ namespace TestAuthorityCore.Controllers
         /// <param name="request">Certificate request.</param>
         /// <returns>Result.</returns>
         [HttpGet]
-        public IActionResult IssueCertificate([FromQuery] CertificateRequest request)
+        public IActionResult IssueCertificate([FromQuery] CertificateRequestModel request)
         {
-            if (request.Hostname.IsNullOrEmpty())
-            {
-                return BadRequest("At least one hostname is required");
-            }
-
-            if (request.CommonName.IsNullOrEmpty())
-            {
-                request.CommonName = $"SSL Certificate ({request.Hostname.First()})";
-            }
-
-            if (request.Password.IsNullOrEmpty())
-            {
-                request.Password = "123123123";
-            }
-
-            if (request.IpAddress.IsNullOrEmpty())
-            {
-                request.IpAddress = new string[0];
-            }
-
-            var request1 = new PfxCertificateRequest
+            var certificateRequest = new CertificateRequest
             {
                 CommonName = request.CommonName,
                 Hostnames = request.Hostname.ToList(),
@@ -93,7 +71,7 @@ namespace TestAuthorityCore.Controllers
                 ValidtyInDays = request.ValidityInDays
             };
 
-            var certificateWithKey = service.GenerateSslCertificate(request1);
+            var certificateWithKey = service.GenerateSslCertificate(certificateRequest);
             if (request.Format == CertificateFormat.Pfx)
             {
                 var resultFilename = string.Concat(request.Filename.Trim('.'), ".pfx");
@@ -107,56 +85,5 @@ namespace TestAuthorityCore.Controllers
                 return File(pem, MediaTypeNames.Application.Zip, resultFilename);
             }
         }
-
-        /// <summary>
-        /// CertificateRequest
-        /// </summary>
-        public class CertificateRequest
-        {
-            /// <summary>
-            /// Common Name
-            /// </summary>
-            [Required]
-            public string CommonName { get; set; }
-
-            /// <summary>
-            /// Password that will be used for PFX file.
-            /// </summary>
-            [DefaultValue("123123213")]
-            public string Password { get; set; }
-
-            /// <summary>
-            /// List of domain names to include in Subject Alternative Name extension.
-            /// </summary>
-            public string[] Hostname { get; set; } = new string[0];
-
-            /// <summary>
-            /// List of IP addresses to include in Subject Alternative Name extension.
-            /// </summary>
-            public string[] IpAddress { get; set; } = new string[0];
-
-            /// <summary>
-            /// Output filename (without extension).
-            /// </summary>
-            [DefaultValue("certificate")]
-            public string Filename { get; set; }
-
-            /// <summary>
-            /// Certificate validity in days.
-            /// </summary>
-            [DefaultValue(365)]
-            public int ValidityInDays { get; set; }
-
-            /// <summary>
-            /// Output format.
-            /// </summary>
-            /// <remarks>
-            /// Pfx will produce PFX file
-            /// Pem will produce ZIP file with certificate,key and root certificate.
-            /// </remarks>
-            [DefaultValue(CertificateFormat.Pfx)]
-            public CertificateFormat Format { get; set; } = CertificateFormat.Pfx;
-        }
-
     }
 }
