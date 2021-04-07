@@ -16,14 +16,14 @@ namespace TestAuthorityCore.Service
         private readonly Func<SecureRandom, CertificateWithKey, CertificateBuilder2> builderFactory;
         private readonly Func<SecureRandom, CertificateWithKey, ICrlBuilder> crlBuilderFactory;
         private readonly RandomService randomService;
-        private readonly CertificateWithKey SignerCertificate;
+        private readonly CertificateWithKey signerCertificate;
 
         /// <summary>
         /// Ctor.
         /// </summary>
         public CertificateAuthorityService(CertificateWithKey signerCertificate, RandomService randomService)
         {
-            SignerCertificate = signerCertificate;
+            this.signerCertificate = signerCertificate;
             this.randomService = randomService;
             builderFactory = (random, issuer) => new CertificateBuilder2(random);
             crlBuilderFactory = (random, issuer) => new CrlBuilder(random, issuer);
@@ -36,7 +36,7 @@ namespace TestAuthorityCore.Service
         public byte[] GenerateCrl()
         {
             SecureRandom random = randomService.GenerateRandom();
-            ICrlBuilder crlBuilder = crlBuilderFactory(random, SignerCertificate);
+            ICrlBuilder crlBuilder = crlBuilderFactory(random, signerCertificate);
             var crl = crlBuilder.Generate();
             return crl.GetEncoded();
         }
@@ -52,11 +52,11 @@ namespace TestAuthorityCore.Service
             DateTimeOffset notAfter = DateTimeOffset.UtcNow.AddDays(request.ValidtyInDays);
             SecureRandom random = randomService.GenerateRandom();
 
-            CertificateBuilder2 builder = builderFactory(random, SignerCertificate);
+            CertificateBuilder2 builder = builderFactory(random, signerCertificate);
 
             AsymmetricCipherKeyPair keyPair = CertificateBuilder2.GenerateKeyPair(2048, random);
 
-            X509Name signerSubject = new X509CertificateParser().ReadCertificate(SignerCertificate.Certificate.RawData)
+            X509Name signerSubject = new X509CertificateParser().ReadCertificate(signerCertificate.Certificate.RawData)
                 .IssuerDN;
 
             CertificateWithKey certificate = builder.WithSubjectCommonName(request.CommonName)
@@ -67,8 +67,8 @@ namespace TestAuthorityCore.Service
                 .WithSubjectAlternativeName(request.Hostnames, request.IpAddresses)
                 .WithBasicConstraints(BasicConstrainsConstants.EndEntity)
                 .WithExtendedKeyUsage()
-                .WithAuthorityKeyIdentifier(SignerCertificate.KeyPair)
-                .Generate(SignerCertificate.KeyPair);
+                .WithAuthorityKeyIdentifier(signerCertificate.KeyPair)
+                .Generate(signerCertificate.KeyPair);
             return certificate;
         }
     }

@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using TestAuthorityCore.Contracts;
 
 namespace TestAuthorityCore.Filters
 {

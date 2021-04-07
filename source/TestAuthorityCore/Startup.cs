@@ -85,7 +85,7 @@ namespace TestAuthorityCore
                     }
                 });
                 config.OperationFilter<AddFileParamTypesOperationFilter>();
-                var filePath = Path.Combine(System.AppContext.BaseDirectory, "TestAuthorityCore.xml");
+                var filePath = Path.Combine(AppContext.BaseDirectory, "TestAuthorityCore.xml");
                 config.IncludeXmlComments(filePath);
 
             });
@@ -100,7 +100,7 @@ namespace TestAuthorityCore
                 var randomService = x.GetRequiredService<RandomService>();
                 CertificateWithKey certificate = rootCertificateService.GetRootCertificate();
 
-                logger.LogInformation($"Using root certificate: {Environment.NewLine}{certificate.Certificate.ToString()}");
+                logger.LogInformation($"Using root certificate: {Environment.NewLine}{certificate.Certificate}");
 
                 return new CertificateAuthorityService(certificate, randomService);
             });

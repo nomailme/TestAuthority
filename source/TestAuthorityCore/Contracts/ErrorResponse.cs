@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 
-/// <summary>
-/// Error response contract.
-/// </summary>
-public class ErrorResponse
+namespace TestAuthorityCore.Contracts
 {
     /// <summary>
-    /// List of errors.
+    /// Error response contract.
     /// </summary>
-    public List<ErrorModel> Errors { get; set; } = new List<ErrorModel>();
+    public class ErrorResponse
+    {
+        /// <summary>
+        /// List of errors.
+        /// </summary>
+        public List<ErrorModel> Errors { get; set; } = new List<ErrorModel>();
+    }
 }

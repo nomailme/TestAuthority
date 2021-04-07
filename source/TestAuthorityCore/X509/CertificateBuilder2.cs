@@ -10,12 +10,11 @@ using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
-using X509Certificate = Org.BouncyCastle.X509.X509Certificate;
 
 namespace TestAuthorityCore.X509
 {
     /// <summary>
-    /// Certificate builder.
+    ///     Certificate builder.
     /// </summary>
     public class CertificateBuilder2 : ICertificateBuilder
     {
@@ -25,62 +24,49 @@ namespace TestAuthorityCore.X509
         private AsymmetricCipherKeyPair keyPair;
 
         /// <summary>
-        /// Ctor.
+        ///     Ctor.
         /// </summary>
         /// <param name="random">Random value.</param>
-        /// <param name="keyStrength">Key strength.</param>
-        public CertificateBuilder2(SecureRandom random, int keyStrength = 2048)
+        public CertificateBuilder2(SecureRandom random)
         {
-            KeyStrength = keyStrength;
             this.random = random;
-            BigInteger serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
+            var serialNumber =
+                BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(long.MaxValue), random);
             certificateGenerator.SetSerialNumber(serialNumber);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public X509Name Issuer { get; set; }
 
-        /// <inheritdoc/>
-        public int KeyStrength { get; }
-
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public AsymmetricKeyParameter PublicKeyInfo => keyPair.Public;
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public X509Name Subject { get; set; }
 
-        /// <inheritdoc/>
-        public static AsymmetricCipherKeyPair GenerateKeyPair(int keyStrength, SecureRandom random)
-        {
-            var keyGenerationParameters = new KeyGenerationParameters(random, keyStrength);
-            var keyPairGenerator = new RsaKeyPairGenerator();
-            keyPairGenerator.Init(keyGenerationParameters);
-            AsymmetricCipherKeyPair subjectKeyPair = keyPairGenerator.GenerateKeyPair();
-            return subjectKeyPair;
-        }
-
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public ICertificateBuilder AddExtension(string oid, bool isCritical, Asn1Encodable value)
         {
             certificateGenerator.AddExtension(oid, isCritical, value);
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public CertificateWithKey Generate()
         {
             return Generate(keyPair);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public CertificateWithKey Generate(AsymmetricCipherKeyPair signerKeyPair)
         {
             Validate();
 
-            ISignatureFactory signatureFactory = new Asn1SignatureFactory(SignatureAlgorithm, signerKeyPair.Private, random);
+            ISignatureFactory signatureFactory =
+                new Asn1SignatureFactory(SignatureAlgorithm, signerKeyPair.Private, random);
             certificateGenerator.SetPublicKey(keyPair.Public);
 
-            X509Certificate certificate = certificateGenerator.Generate(signatureFactory);
+            var certificate = certificateGenerator.Generate(signatureFactory);
             certificate.Verify(signerKeyPair.Public);
             var x509 = new X509Certificate2(certificate.GetEncoded());
 
@@ -92,7 +78,7 @@ namespace TestAuthorityCore.X509
             return result;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public ICertificateBuilder SetIssuer(X509Name issuer)
         {
             Issuer = issuer;
@@ -100,21 +86,21 @@ namespace TestAuthorityCore.X509
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public ICertificateBuilder SetNotAfter(DateTimeOffset notAfter)
         {
             certificateGenerator.SetNotAfter(notAfter.UtcDateTime);
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public ICertificateBuilder SetNotBefore(DateTimeOffset notBefore)
         {
             certificateGenerator.SetNotBefore(notBefore.UtcDateTime);
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public ICertificateBuilder SetSubject(X509Name subject)
         {
             Subject = subject;
@@ -122,7 +108,7 @@ namespace TestAuthorityCore.X509
             return this;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public ICertificateBuilder WithBasicConstraints(BasicConstrainsConstants constrains)
         {
             if (constrains == BasicConstrainsConstants.EndEntity)
@@ -135,29 +121,35 @@ namespace TestAuthorityCore.X509
             return this;
         }
 
-        /// <inheritdoc/>
-        public ICertificateBuilder WithKeyPair(AsymmetricCipherKeyPair keyPair)
+        /// <inheritdoc />
+        public ICertificateBuilder WithKeyPair(AsymmetricCipherKeyPair value)
         {
-            this.keyPair = keyPair;
+            keyPair = value;
             return this;
+        }
+
+        /// <summary>
+        ///     Generate key pair.
+        /// </summary>
+        /// <param name="keyStrength">Key stregth.</param>
+        /// <param name="random"><see cref="SecureRandom" />.</param>
+        /// <returns><see cref="AsymmetricCipherKeyPair" />.</returns>
+        public static AsymmetricCipherKeyPair GenerateKeyPair(int keyStrength, SecureRandom random)
+        {
+            var keyGenerationParameters = new KeyGenerationParameters(random, keyStrength);
+            var keyPairGenerator = new RsaKeyPairGenerator();
+            keyPairGenerator.Init(keyGenerationParameters);
+            var subjectKeyPair = keyPairGenerator.GenerateKeyPair();
+            return subjectKeyPair;
         }
 
         private void Validate()
         {
-            if (Issuer.IsNull())
-            {
-                throw new InvalidOperationException("Issuer is empty");
-            }
+            if (Issuer.IsNull()) throw new InvalidOperationException("Issuer is empty");
 
-            if (Subject.IsNull())
-            {
-                throw new InvalidOperationException("Issuer is empty");
-            }
+            if (Subject.IsNull()) throw new InvalidOperationException("Issuer is empty");
 
-            if (PublicKeyInfo.IsNull())
-            {
-                throw new InvalidOperationException("PublicKeyInfo is empty");
-            }
+            if (PublicKeyInfo.IsNull()) throw new InvalidOperationException("PublicKeyInfo is empty");
         }
     }
 }

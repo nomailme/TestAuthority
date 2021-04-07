@@ -18,7 +18,6 @@ namespace TestAuthorityCore.Service
     /// </summary>
     public class RootCertificateService
     {
-        private const int KeyStrength = 2048;
         private const string Password = "123123123";
         private const string RootCertificateName = "Root.pfx";
         private readonly Func<SecureRandom, ICertificateBuilder> builderFactory;
@@ -28,7 +27,7 @@ namespace TestAuthorityCore.Service
         /// </summary>
         public RootCertificateService()
         {
-            builderFactory = (random) => new CertificateBuilder2(random, KeyStrength);
+            builderFactory = (random) => new CertificateBuilder2(random);
         }
 
         /// <summary>

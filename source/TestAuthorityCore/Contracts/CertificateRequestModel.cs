@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Linq;
+using TestAuthorityCore.X509;
 
 namespace TestAuthorityCore.Contracts
 {

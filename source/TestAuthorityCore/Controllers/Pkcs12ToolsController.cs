@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,13 +11,13 @@ using Org.BouncyCastle.X509;
 namespace TestAuthorityCore.Controllers
 {
     /// <summary>
-    /// Provides API for pfx tooling.
+    ///     Provides API for pfx tooling.
     /// </summary>
     [Route("api/pkcs12")]
     public class Pkcs12ToolsController : Controller
     {
         /// <summary>
-        /// Convert certificate and key in Pem format to Pfx(Pkcs12).
+        ///     Convert certificate and key in Pem format to Pfx(Pkcs12).
         /// </summary>
         /// <param name="pemCertificate">Certificate in Pem format.</param>
         /// <param name="pemKey">Private key in Pem format.</param>
@@ -26,12 +25,13 @@ namespace TestAuthorityCore.Controllers
         /// <param name="filename">Output filename.</param>
         /// <returns>Certificate with private key in Pkcs12 container.</returns>
         [HttpPost("from-pem")]
-        public IActionResult ConvertToPfx(IFormFile pemCertificate, IFormFile pemKey, string password, string filename = "certificate.pfx")
+        public IActionResult ConvertToPfx(IFormFile pemCertificate, IFormFile pemKey, string password,
+            string filename = "certificate.pfx")
         {
-            byte[] certificate = ToArray(pemCertificate.OpenReadStream());
-            byte[] key = ToArray(pemKey.OpenReadStream());
+            var certificate = ToArray(pemCertificate.OpenReadStream());
+            var key = ToArray(pemKey.OpenReadStream());
 
-            byte[] result = ConvertToPfxImpl(certificate, key, password);
+            var result = ConvertToPfxImpl(certificate, key, password);
             return File(result, MediaTypeNames.Application.Octet, filename);
         }
 
@@ -48,18 +48,15 @@ namespace TestAuthorityCore.Controllers
         {
             using var stream = new MemoryStream(input);
             using var streamReader = new StreamReader(stream);
-            object value = new PemReader(streamReader).ReadObject();
-            if (value is TOutput result)
-            {
-                return result;
-            }
+            var value = new PemReader(streamReader).ReadObject();
+            if (value is TOutput result) return result;
 
             return null;
         }
 
         private byte[] ConvertToPfxImpl(byte[] certificate, byte[] privateKey, string password)
         {
-            Pkcs12Store store = new Pkcs12StoreBuilder().Build();
+            var store = new Pkcs12StoreBuilder().Build();
 
             var certificateEntry = new X509CertificateEntry[1];
             var x509Certificate = ToCrypto<X509Certificate>(certificate);
@@ -67,7 +64,8 @@ namespace TestAuthorityCore.Controllers
 
             var asymmetricCipherKeyPair = ToCrypto<AsymmetricCipherKeyPair>(privateKey);
 
-            store.SetKeyEntry(x509Certificate.SubjectDN.ToString(), new AsymmetricKeyEntry(asymmetricCipherKeyPair.Private), certificateEntry);
+            store.SetKeyEntry(x509Certificate.SubjectDN.ToString(),
+                new AsymmetricKeyEntry(asymmetricCipherKeyPair.Private), certificateEntry);
             var result = new MemoryStream();
             store.Save(result, password.ToCharArray(), new SecureRandom());
             result.Position = 0;

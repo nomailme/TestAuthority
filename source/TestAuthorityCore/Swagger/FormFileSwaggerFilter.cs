@@ -20,6 +20,7 @@ namespace TestAuthorityCore.Swagger
     /// </summary>
     public class AddFileParamTypesOperationFilter : IOperationFilter
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly string[] fileParameters = new[] { "ContentType", "ContentDisposition", "Headers", "Length", "Name", "FileName" };
 
         /// <summary>

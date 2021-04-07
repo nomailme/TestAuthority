@@ -1,11 +1,10 @@
-﻿using System;
-using Org.BouncyCastle.Crypto.Prng;
+﻿using Org.BouncyCastle.Crypto.Prng;
 using Org.BouncyCastle.Security;
 
 namespace TestAuthorityCore.Service
 {
     /// <summary>
-    /// Service that provides random values.
+    ///     Service that provides random values.
     /// </summary>
     public class RandomService
     {
@@ -13,7 +12,7 @@ namespace TestAuthorityCore.Service
         private readonly CryptoApiRandomGenerator randomGenerator = new CryptoApiRandomGenerator();
 
         /// <summary>
-        /// Ctor.
+        ///     Ctor.
         /// </summary>
         public RandomService()
         {
@@ -21,7 +20,7 @@ namespace TestAuthorityCore.Service
         }
 
         /// <summary>
-        /// Generate random value.
+        ///     Generate random value.
         /// </summary>
         /// <returns>Random value.</returns>
         public SecureRandom GenerateRandom()
