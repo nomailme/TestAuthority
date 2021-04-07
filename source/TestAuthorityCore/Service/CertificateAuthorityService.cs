@@ -46,7 +46,7 @@ namespace TestAuthorityCore.Service
         /// </summary>
         /// <param name="request">Certificate Request.</param>
         /// <returns>Certificate <seecref name="CertificateWithKey"/>.</returns>
-        public CertificateWithKey GenerateSslCertificate(PfxCertificateRequest request)
+        public CertificateWithKey GenerateSslCertificate(CertificateRequest request)
         {
             DateTimeOffset notBefore = DateTimeOffset.UtcNow.AddHours(-2);
             DateTimeOffset notAfter = DateTimeOffset.UtcNow.AddDays(request.ValidtyInDays);

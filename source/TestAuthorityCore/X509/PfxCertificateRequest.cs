@@ -5,7 +5,7 @@ namespace TestAuthorityCore.X509
     /// <summary>
     /// Request for certificate.
     /// </summary>
-    public class PfxCertificateRequest
+    public class CertificateRequest
     {
         /// <summary>
         /// Common name of the certificate.

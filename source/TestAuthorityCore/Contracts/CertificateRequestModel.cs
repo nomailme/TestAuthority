@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Linq;
 
 namespace TestAuthorityCore.Contracts
 {
@@ -7,10 +8,27 @@ namespace TestAuthorityCore.Contracts
     /// </summary>
     public class CertificateRequestModel
     {
+        private string commonName = string.Empty;
         /// <summary>
         /// Common Name
         /// </summary>
-        public string CommonName { get; set; } = "Certificate";
+        public string CommonName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(commonName))
+                {
+                    var allSanRecords = Hostname.ToList().Concat(IpAddress);
+                    var firstRecord = allSanRecords.First();
+                    return $"{firstRecord} certificate";
+                }
+                return commonName;
+            }
+            set
+            {
+                commonName = value;
+            }
+        }
 
         /// <summary>
         /// Password that will be used for PFX file.
