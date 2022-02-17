@@ -33,12 +33,12 @@ namespace TestAuthorityCore.Service
         /// Generate CRL file.
         /// </summary>
         /// <returns>Crl file as a byte array.</returns>
-        public byte[] GenerateCrl()
+        public CrlFile GenerateCrl()
         {
             SecureRandom random = randomService.GenerateRandom();
             ICrlBuilder crlBuilder = crlBuilderFactory(random, signerCertificate);
             var crl = crlBuilder.Generate();
-            return crl.GetEncoded();
+            return new CrlFile(crl);
         }
 
         /// <summary>

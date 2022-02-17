@@ -49,7 +49,8 @@ namespace TestAuthorityCore.Controllers
         [HttpGet("/api/certificate/crl")]
         public IActionResult GetCrl()
         {
-            var result = service.GenerateCrl();
+            var crl = service.GenerateCrl();
+            var result =  converter.ConvertToPem(crl);
             return File(result, MediaTypeNames.Application.Octet, "root.crl");
         }
 

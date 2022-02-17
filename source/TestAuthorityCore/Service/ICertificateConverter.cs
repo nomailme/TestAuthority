@@ -22,5 +22,12 @@ namespace TestAuthorityCore.Service
         /// <param name="password">Pfx password.</param>
         /// <returns>Pfx file as a byte array.</returns>
         byte[] ConvertToPfx(CertificateWithKey certificate, string password);
+
+        /// <summary>
+        /// Convert CRL to pem format.
+        /// </summary>
+        /// <param name="crl"><see cref="CrlFile"/>.</param>
+        /// <returns>Pem representation of Crl.</returns>
+        byte[] ConvertToPem(CrlFile crl);
     }
 }

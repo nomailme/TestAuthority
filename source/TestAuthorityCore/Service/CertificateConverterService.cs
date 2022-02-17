@@ -31,7 +31,7 @@ namespace TestAuthorityCore.Service
             this.randomService = randomService;
             this.rootCertificateService = rootCertificateService;
         }
-    
+
         /// <summary>
         /// Convert certificate to zip archive with certificate and key in PEM format.
         /// </summary>
@@ -53,6 +53,13 @@ namespace TestAuthorityCore.Service
         {
 
             return ConvertToPfxCore(certificate.Certificate, (RsaPrivateCrtKeyParameters)certificate.KeyPair?.Private, password);
+        }
+
+        /// <inheritdoc />
+        public byte[] ConvertToPem(CrlFile crl)
+        {
+            var pem = ConvertToPemFormat(crl.Crl);
+            return Encoding.ASCII.GetBytes(pem);
         }
 
         private byte[] ConvertToPfxCore(X509Certificate2 x509, RsaPrivateCrtKeyParameters rsaParams, string pfxPassword)
@@ -103,21 +110,21 @@ namespace TestAuthorityCore.Service
         {
             var generator = new MiscPemGenerator(input);
 
-            string certificateString;
+            string outputString;
             using (var textWriter = new StringWriter())
             {
                 var writer = new PemWriter(textWriter);
                 writer.WriteObject(generator);
                 writer.Writer.Flush();
-                certificateString = textWriter.ToString();
+                outputString = textWriter.ToString();
             }
 
-            if (string.IsNullOrWhiteSpace(certificateString))
+            if (string.IsNullOrWhiteSpace(outputString))
             {
                 throw new InvalidOperationException();
             }
 
-            return certificateString;
+            return outputString;
         }
     }
 }
