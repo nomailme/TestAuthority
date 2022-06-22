@@ -17,8 +17,8 @@ namespace TestAuthorityCore.Filters
             if (!context.ModelState.IsValid)
             {
                 var errorsInModelState = context.ModelState
-                .Where(x => x.Value.Errors.Count > 0)
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Errors.Select(x => x.ErrorMessage)).ToArray();
+                .Where(x => x.Value?.Errors.Count > 0)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.Errors.Select(x => x.ErrorMessage)).ToArray();
 
                 var errorResponse = new ErrorResponse();
 

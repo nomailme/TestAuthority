@@ -1,15 +1,15 @@
 ﻿using System;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Security;
-using Org.BouncyCastle.X509;
-using TestAuthorityCore.Extensions;
-using TestAuthorityCore.X509;
+using Serilog;
+using TestAuthority.Application;
+using TestAuthority.Application.Random;
+using TestAuthority.Domain.Models;
+using TestAuthority.Domain.Services;
 
 namespace TestAuthorityCore.Service
 {
     /// <summary>
-    /// Service that provides methods for certificate generation.
+    ///     Service that provides methods for certificate generation.
     /// </summary>
     public class CertificateAuthorityService
     {
@@ -17,59 +17,63 @@ namespace TestAuthorityCore.Service
         private readonly Func<SecureRandom, CertificateWithKey, ICrlBuilder> crlBuilderFactory;
         private readonly RandomService randomService;
         private readonly CertificateWithKey signerCertificate;
+        private readonly ILogger logger = Log.ForContext<CertificateAuthorityService>();
 
         /// <summary>
-        /// Ctor.
+        ///     Ctor.
         /// </summary>
         public CertificateAuthorityService(CertificateWithKey signerCertificate, RandomService randomService)
         {
             this.signerCertificate = signerCertificate;
             this.randomService = randomService;
-            builderFactory = (random, issuer) => new CertificateBuilder2(random);
+            builderFactory = (random, _) => new CertificateBuilder2(random);
             crlBuilderFactory = (random, issuer) => new CrlBuilder(random, issuer);
         }
 
         /// <summary>
-        /// Generate CRL file.
+        ///     Generate CRL file.
         /// </summary>
         /// <returns>Crl file as a byte array.</returns>
-        public CrlFile GenerateCrl()
+        public CrlFileModel GenerateCrl()
         {
-            SecureRandom random = randomService.GenerateRandom();
-            ICrlBuilder crlBuilder = crlBuilderFactory(random, signerCertificate);
+            var random = randomService.GenerateRandom();
+            var crlBuilder = crlBuilderFactory(random, signerCertificate);
             var crl = crlBuilder.Generate();
-            return new CrlFile(crl);
+            return new CrlFileModel(crl);
         }
 
         /// <summary>
-        /// Generate certificate using certificate request.
+        ///     Generate certificate using certificate request.
         /// </summary>
-        /// <param name="request">Certificate Request.</param>
-        /// <returns>Certificate <seecref name="CertificateWithKey"/>.</returns>
-        public CertificateWithKey GenerateSslCertificate(CertificateRequest request)
+        /// <param name="requestModel">Certificate Request.</param>
+        /// <returns>Certificate <seecref name="CertificateWithKey" />.</returns>
+        public CertificateWithKey GenerateSslCertificate(CertificateRequestModel requestModel)
         {
-            DateTimeOffset notBefore = DateTimeOffset.UtcNow.AddHours(-2);
-            DateTimeOffset notAfter = DateTimeOffset.UtcNow.AddDays(request.ValidtyInDays);
-            SecureRandom random = randomService.GenerateRandom();
+            var notBefore = DateTimeOffset.UtcNow.AddHours(-2);
+            var notAfter = DateTimeOffset.UtcNow.AddDays(requestModel.ValidityInDays);
+            var random = randomService.GenerateRandom();
 
-            CertificateBuilder2 builder = builderFactory(random, signerCertificate);
+            var builder = builderFactory(random, signerCertificate);
 
-            AsymmetricCipherKeyPair keyPair = CertificateBuilder2.GenerateKeyPair(2048, random);
+            var keyPair = CertificateBuilder2.GenerateKeyPair(2048, random);
 
-            X509Name signerSubject = new X509CertificateParser().ReadCertificate(signerCertificate.Certificate.RawData)
-                .IssuerDN;
+            var signerSubject = signerCertificate.Certificate.IssuerDN;
 
-            CertificateWithKey certificate = builder.WithSubjectCommonName(request.CommonName)
+            var certificate = builder.WithSubjectCommonName(requestModel.CommonName)
                 .WithKeyPair(keyPair)
-                .SetIssuer(signerSubject)
-                .SetNotAfter(notAfter)
-                .SetNotBefore(notBefore)
-                .WithSubjectAlternativeName(request.Hostnames, request.IpAddresses)
+                .WithIssuerName(signerSubject)
+                .WithNotAfter(notAfter)
+                .WithNotBefore(notBefore)
+                .WithSubjectAlternativeName(requestModel.Hostnames, requestModel.IpAddresses)
                 .WithBasicConstraints(BasicConstrainsConstants.EndEntity)
                 .WithExtendedKeyUsage()
                 .WithAuthorityKeyIdentifier(signerCertificate.KeyPair)
                 .Generate(signerCertificate.KeyPair);
+
+            logger.Information("Issued certificate: \r\n {Certificate}", certificate.Certificate);
             return certificate;
+
+
         }
     }
 }

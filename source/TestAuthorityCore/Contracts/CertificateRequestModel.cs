@@ -1,6 +1,6 @@
+using System;
 using System.ComponentModel;
-using System.Linq;
-using TestAuthorityCore.X509;
+using TestAuthority.Domain.Models;
 
 namespace TestAuthorityCore.Contracts
 {
@@ -9,43 +9,27 @@ namespace TestAuthorityCore.Contracts
     /// </summary>
     public class CertificateRequestModel
     {
-        private string commonName = string.Empty;
         /// <summary>
         /// Common Name
         /// </summary>
-        public string CommonName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(commonName))
-                {
-                    var allSanRecords = Hostname.ToList().Concat(IpAddress);
-                    var firstRecord = allSanRecords.First();
-                    return $"{firstRecord} certificate";
-                }
-                return commonName;
-            }
-            set
-            {
-                commonName = value;
-            }
-        }
+        public string CommonName { get; set; }
 
         /// <summary>
         /// Password that will be used for PFX file.
         /// </summary>
-        [DefaultValue("123123213")]
+        [DefaultValue("123123123")]
         public string Password { get; set; }
 
         /// <summary>
         /// List of domain names to include in Subject Alternative Name extension.
         /// </summary>
-        public string[] Hostname { get; set; } = new string[0];
+        public string[] Hostname { get; set; } = Array.Empty<string>();
 
         /// <summary>
         /// List of IP addresses to include in Subject Alternative Name extension.
         /// </summary>
-        public string[] IpAddress { get; set; } = new string[0];
+        ///
+        public string[] IpAddress { get; set; } = Array.Empty<string>();
 
         /// <summary>
         /// Output filename (without extension).
@@ -66,8 +50,8 @@ namespace TestAuthorityCore.Contracts
         /// Pfx will produce PFX file
         /// Pem will produce ZIP file with certificate,key and root certificate.
         /// </remarks>
-        [DefaultValue(CertificateFormat.Pfx)]
-        public CertificateFormat Format { get; set; } = CertificateFormat.Pfx;
+        [DefaultValue(OutputFormat.Pem)]
+        public OutputFormat Format { get; set; } = OutputFormat.Pem;
     }
 
 }

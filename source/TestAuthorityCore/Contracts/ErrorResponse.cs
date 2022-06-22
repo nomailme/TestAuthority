@@ -10,6 +10,6 @@ namespace TestAuthorityCore.Contracts
         /// <summary>
         /// List of errors.
         /// </summary>
-        public List<ErrorModel> Errors { get; set; } = new List<ErrorModel>();
+        public List<ErrorModel> Errors { get; set; } = new();
     }
 }

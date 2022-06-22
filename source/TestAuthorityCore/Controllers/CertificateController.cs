@@ -1,9 +1,10 @@
 ﻿using System.Linq;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
-using TestAuthorityCore.Contracts;
+using TestAuthority.Application;
+using TestAuthority.Domain.Models;
 using TestAuthorityCore.Service;
-using TestAuthorityCore.X509;
+using CertificateRequestModel = TestAuthorityCore.Contracts.CertificateRequestModel;
 
 namespace TestAuthorityCore.Controllers
 {
@@ -23,7 +24,8 @@ namespace TestAuthorityCore.Controllers
         /// <param name="service"><seecref name="CertificateAuthorityService" />.</param>
         /// <param name="rootCertificateService"><seecref name="RootCertificateService" />.</param>
         /// <param name="converter"><seecref name="ICertificateConverter" />.</param>
-        public CertificateController(CertificateAuthorityService service, RootCertificateService rootCertificateService,
+        public CertificateController(CertificateAuthorityService service,
+            RootCertificateService rootCertificateService,
             ICertificateConverter converter)
         {
             this.service = service;
@@ -38,7 +40,7 @@ namespace TestAuthorityCore.Controllers
         [HttpGet("/api/certificate/root")]
         public IActionResult GetRootCertificate()
         {
-            var result = rootCertificateService.GetRootCertificate().Certificate.RawData;
+            var result = rootCertificateService.GetRootCertificate().Certificate.GetEncoded();
             return File(result, MediaTypeNames.Application.Octet, "root.cer");
         }
 
@@ -50,7 +52,7 @@ namespace TestAuthorityCore.Controllers
         public IActionResult GetCrl()
         {
             var crl = service.GenerateCrl();
-            var result =  converter.ConvertToPem(crl);
+            var result = converter.ConvertToPem(crl);
             return File(result, MediaTypeNames.Application.Octet, "root.crl");
         }
 
@@ -61,19 +63,21 @@ namespace TestAuthorityCore.Controllers
         /// <param name="request">Certificate request.</param>
         /// <returns>Result.</returns>
         [HttpGet]
-        public IActionResult IssueCertificate([FromQuery] CertificateRequestModel request)
+        public IActionResult IssueCertificate(CertificateRequestModel request)
         {
-            var certificateRequest = new CertificateRequest
+            var certificateRequest = new TestAuthority.Domain.Models.CertificateRequestModel
             {
                 CommonName = request.CommonName,
                 Hostnames = request.Hostname.ToList(),
                 IpAddresses = request.IpAddress.ToList(),
-                Password = request.Password,
-                ValidtyInDays = request.ValidityInDays
+                ValidityInDays = request.ValidityInDays
             };
 
+
             var certificateWithKey = service.GenerateSslCertificate(certificateRequest);
-            if (request.Format == CertificateFormat.Pfx)
+
+
+            if (request.Format == OutputFormat.Pfx)
             {
                 var resultFilename = string.Concat(request.Filename.Trim('.'), ".pfx");
                 var pfx = converter.ConvertToPfx(certificateWithKey, request.Password);

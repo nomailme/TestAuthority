@@ -1,14 +1,15 @@
 using System;
 using System.IO;
 using System.IO.Compression;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
-using TestAuthorityCore.X509;
+using TestAuthority.Application;
+using TestAuthority.Application.Random;
+using TestAuthority.Domain.Models;
 using X509Certificate = Org.BouncyCastle.X509.X509Certificate;
 
 namespace TestAuthorityCore.Service
@@ -56,19 +57,18 @@ namespace TestAuthorityCore.Service
         }
 
         /// <inheritdoc />
-        public byte[] ConvertToPem(CrlFile crl)
+        public byte[] ConvertToPem(CrlFileModel crl)
         {
             var pem = ConvertToPemFormat(crl.Crl);
             return Encoding.ASCII.GetBytes(pem);
         }
 
-        private byte[] ConvertToPfxCore(X509Certificate2 x509, RsaPrivateCrtKeyParameters rsaParams, string pfxPassword)
+        private byte[] ConvertToPfxCore(X509Certificate certificate, RsaPrivateCrtKeyParameters rsaParams, string pfxPassword)
         {
             var store = new Pkcs12Store();
             SecureRandom random = randomService.GenerateRandom();
-            X509Certificate cert = DotNetUtilities.FromX509Certificate(x509);
-            string friendlyName = cert.SubjectDN.ToString();
-            var certificateEntry = new X509CertificateEntry(cert);
+            string friendlyName = certificate.SubjectDN.ToString();
+            var certificateEntry = new X509CertificateEntry(certificate);
 
             store.SetCertificateEntry(friendlyName, certificateEntry);
             store.SetKeyEntry(friendlyName,
@@ -81,17 +81,16 @@ namespace TestAuthorityCore.Service
             return stream.ToArray();
         }
 
-        private byte[] ConvertToPemArchiveCore(X509Certificate2 certificate, AsymmetricKeyParameter keyPair)
+        private byte[] ConvertToPemArchiveCore(X509Certificate certificate, AsymmetricKeyParameter keyPair)
         {
             var rootCertificateWithKey = rootCertificateService.GetRootCertificate();
-            var rootCertificate = DotNetUtilities.FromX509Certificate(rootCertificateWithKey.Certificate);
+            var rootCertificate = rootCertificateWithKey.Certificate;
             using var stream = new MemoryStream();
             using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, true))
             {
                 WriteEntry("root.crt", rootCertificate, archive);
                 WriteEntry("private.key", keyPair, archive);
-                var cert = DotNetUtilities.FromX509Certificate(certificate);
-                WriteEntry("certificate.crt", cert, archive);
+                WriteEntry("certificate.crt", certificate, archive);
             }
             return stream.ToArray();
         }

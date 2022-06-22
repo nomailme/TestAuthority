@@ -1,4 +1,4 @@
-using TestAuthorityCore.X509;
+using TestAuthority.Domain.Models;
 
 namespace TestAuthorityCore.Service
 {
@@ -26,8 +26,8 @@ namespace TestAuthorityCore.Service
         /// <summary>
         /// Convert CRL to pem format.
         /// </summary>
-        /// <param name="crl"><see cref="CrlFile"/>.</param>
+        /// <param name="crl"><see cref="CrlFileModel"/>.</param>
         /// <returns>Pem representation of Crl.</returns>
-        byte[] ConvertToPem(CrlFile crl);
+        byte[] ConvertToPem(CrlFileModel crl);
     }
 }
