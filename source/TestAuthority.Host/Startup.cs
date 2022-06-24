@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TestAuthority.Application.Random;
-using TestAuthorityCore.Extensions;
-using TestAuthorityCore.Filters;
+using TestAuthority.Host.Filters;
+using TestAuthority.Host.Extensions;
 
-namespace TestAuthorityCore
+namespace TestAuthority.Host
 {
     /// <summary>
     ///     Startup class.

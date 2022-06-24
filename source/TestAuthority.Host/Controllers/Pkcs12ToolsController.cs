@@ -8,7 +8,7 @@ using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 
-namespace TestAuthorityCore.Controllers
+namespace TestAuthority.Host.Controllers
 {
     /// <summary>
     ///     Provides API for pfx tooling.

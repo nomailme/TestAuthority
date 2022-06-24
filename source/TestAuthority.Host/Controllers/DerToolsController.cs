@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.X509;
 
-namespace TestAuthorityCore.Controllers
+namespace TestAuthority.Host.Controllers
 {
     /// <summary>
     /// Provides some useful tools like certificateName conversion.

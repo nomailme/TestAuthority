@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TestAuthorityCore.Contracts
+namespace TestAuthority.Host.Contracts
 {
     /// <summary>
     /// Error response contract.

@@ -3,10 +3,10 @@ using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using TestAuthority.Application;
 using TestAuthority.Domain.Models;
-using TestAuthorityCore.Service;
-using CertificateRequestModel = TestAuthorityCore.Contracts.CertificateRequestModel;
+using TestAuthority.Host.Service;
+using CertificateRequestModel = TestAuthority.Host.Contracts.CertificateRequestModel;
 
-namespace TestAuthorityCore.Controllers
+namespace TestAuthority.Host.Controllers
 {
     /// <summary>
     ///     Provides functionality to work with certificates
@@ -63,7 +63,7 @@ namespace TestAuthorityCore.Controllers
         /// <param name="request">Certificate request.</param>
         /// <returns>Result.</returns>
         [HttpGet]
-        public IActionResult IssueCertificate(CertificateRequestModel request)
+        public IActionResult IssueCertificate(Contracts.CertificateRequestModel request)
         {
             var certificateRequest = new TestAuthority.Domain.Models.CertificateRequestModel
             {

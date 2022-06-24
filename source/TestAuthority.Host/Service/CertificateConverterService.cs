@@ -12,7 +12,7 @@ using TestAuthority.Application.Random;
 using TestAuthority.Domain.Models;
 using X509Certificate = Org.BouncyCastle.X509.X509Certificate;
 
-namespace TestAuthorityCore.Service
+namespace TestAuthority.Host.Service
 {
     /// <summary>
     /// Service that provides convertion of certificates to <seecref name="CerficateWithKey"/>.

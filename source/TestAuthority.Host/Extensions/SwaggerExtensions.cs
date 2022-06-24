@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using TestAuthorityCore.Swagger;
+using TestAuthority.Host.Swagger;
 
-namespace TestAuthorityCore.Extensions;
+namespace TestAuthority.Host.Extensions;
 
 /// <summary>
 /// Extension methods for swagger.
@@ -31,7 +31,7 @@ public static class SwaggerExtensions
                 }
             });
             config.OperationFilter<AddFileParamTypesOperationFilter>();
-            var filePath = Path.Combine(AppContext.BaseDirectory, "TestAuthorityCore.xml");
+            var filePath = Path.Combine(AppContext.BaseDirectory, "TestAuthority.Host.xml");
             config.IncludeXmlComments(filePath);
         });
     }

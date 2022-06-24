@@ -5,6 +5,7 @@
     <DockerTargetOS>Linux</DockerTargetOS>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <LangVersion>10</LangVersion>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\TestAuthority.Application\TestAuthority.Application.csproj" />
-    <ProjectReference Include="..\..\TestAuthority.Domain\TestAuthority.Domain.csproj" />
+    <ProjectReference Include="..\TestAuthority.Application\TestAuthority.Application.csproj" />
+    <ProjectReference Include="..\TestAuthority.Domain\TestAuthority.Domain.csproj" />
   </ItemGroup>
 
 </Project>

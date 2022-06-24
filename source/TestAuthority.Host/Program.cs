@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
-namespace TestAuthorityCore
+namespace TestAuthority.Host
 {
     /// <summary>
     ///     The one and only.
@@ -47,7 +47,7 @@ namespace TestAuthorityCore
         /// </returns>
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
-            return Host.CreateDefaultBuilder(args)
+            return Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .UseSerilog((context, services, configuration) =>
                 {
                     configuration

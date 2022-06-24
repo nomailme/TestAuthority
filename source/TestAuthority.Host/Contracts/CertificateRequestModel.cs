@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using TestAuthority.Domain.Models;
 
-namespace TestAuthorityCore.Contracts
+namespace TestAuthority.Host.Contracts
 {
     /// <summary>
     /// CertificateRequest

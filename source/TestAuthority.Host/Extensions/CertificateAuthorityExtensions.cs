@@ -3,9 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TestAuthority.Application;
 using TestAuthority.Application.Random;
-using TestAuthorityCore.Service;
+using TestAuthority.Host.Service;
 
-namespace TestAuthorityCore.Extensions;
+namespace TestAuthority.Host.Extensions;
 
 /// <summary>
 ///     Extension methods for CA.

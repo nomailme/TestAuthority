@@ -1,4 +1,4 @@
-namespace TestAuthorityCore.Contracts
+namespace TestAuthority.Host.Contracts
 {
     /// <summary>
     /// Error model.

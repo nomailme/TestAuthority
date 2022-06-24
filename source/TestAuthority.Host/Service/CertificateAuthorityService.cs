@@ -6,7 +6,7 @@ using TestAuthority.Application.Random;
 using TestAuthority.Domain.Models;
 using TestAuthority.Domain.Services;
 
-namespace TestAuthorityCore.Service
+namespace TestAuthority.Host.Service
 {
     /// <summary>
     ///     Service that provides methods for certificate generation.

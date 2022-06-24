@@ -1,13 +1,13 @@
 using FluentValidation;
 using TestAuthority.Domain.Models;
-using CertificateRequestModel = TestAuthorityCore.Contracts.CertificateRequestModel;
+using CertificateRequestModel = TestAuthority.Host.Contracts.CertificateRequestModel;
 
-namespace TestAuthorityCore.Validators
+namespace TestAuthority.Host.Validators
 {
     /// <summary>
     ///     Validation for certificate request.
     /// </summary>
-    public class CertificateRequestValidator : AbstractValidator<CertificateRequestModel>
+    public class CertificateRequestValidator : AbstractValidator<Contracts.CertificateRequestModel>
     {
         /// <summary>
         ///     Ctor.
@@ -23,7 +23,7 @@ namespace TestAuthorityCore.Validators
                 .WithMessage("You must provide a password for PFX");
         }
 
-        private bool AnyHostnamesOrIpAddresses(CertificateRequestModel request)
+        private bool AnyHostnamesOrIpAddresses(Contracts.CertificateRequestModel request)
         {
             var sanRecords = 0;
             sanRecords += request.Hostname?.Length ?? 0;
