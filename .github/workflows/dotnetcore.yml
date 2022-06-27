@@ -17,7 +17,7 @@ jobs:
         # Password used to login docker registry
         password: ${{ secrets.dockerHubSecret }}
         # Docker build context
-        path: source/TestAuthorityCore
-        file: source/TestAuthorityCore/Dockerfile
+        path: .
+        file: source/TestAuthority.Host/Dockerfile
         repository: nomail/test-authority
         auto_tag: true
