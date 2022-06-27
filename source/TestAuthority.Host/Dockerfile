@@ -1,7 +1,7 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 
 WORKDIR /app
-EXPOSE 80
+
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 
@@ -22,6 +22,8 @@ RUN dotnet publish "TestAuthority.Host.csproj" -c Release -o /app/publish
 
 FROM base AS final
 MAINTAINER Iskanders Jarmuhametovs (nomail86<-at->gmail.com)
+
+EXPOSE 80
 
 WORKDIR /app
 COPY --from=publish /app/publish .
