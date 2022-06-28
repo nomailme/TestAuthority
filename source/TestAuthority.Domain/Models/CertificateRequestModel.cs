@@ -21,7 +21,7 @@ public record CertificateRequestModel
     public List<string> IpAddresses { get; set; } = new();
 
     /// <summary>
-    ///     Certificate validtiy in days.
+    ///     Certificate validity in days.
     /// </summary>
     /// <value>Default value of 364.</value>
     public int ValidityInDays { get; set; } = 364;

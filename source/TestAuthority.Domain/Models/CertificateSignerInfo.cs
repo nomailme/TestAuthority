@@ -3,11 +3,11 @@ using Org.BouncyCastle.X509;
 
 namespace TestAuthority.Domain.Models;
 
-public record CertificateSignerInfo
+public record CertificateSignerInfo(CertificateWithKey SignerCertificate, List<X509Certificate>? Chain)
 {
-    public CertificateWithKey? CertificateWithKey { get; set; }
+    public CertificateWithKey SignerCertificate { get; } = SignerCertificate;
 
-    public X509Name? Subject => CertificateWithKey?.Certificate.SubjectDN;
+    public X509Name? Subject => SignerCertificate.Certificate.SubjectDN;
 
-    public List<X509Certificate> Chain { get; set; } = new();
+    public List<X509Certificate> Chain { get; } = Chain ?? new List<X509Certificate>();
 }

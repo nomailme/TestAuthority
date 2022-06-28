@@ -50,7 +50,7 @@ public class RootWithIntermediateCertificateService : ISignerProvider
             certificateStore.SaveCertificate(IntermediateCertificateName, intermediateCertificate, new PfxContainerOptions{ PfxPassword = Password});
         }
 
-        return new CertificateSignerInfo { CertificateWithKey = intermediateCertificate, Chain = new List<X509Certificate> { rootCertificate.Certificate } };
+        return new CertificateSignerInfo(intermediateCertificate, new List<X509Certificate> { rootCertificate.Certificate });
     }
 
     private CertificateWithKey GenerateIntermediateCertificate(CertificateWithKey signerCertificate)

@@ -14,7 +14,7 @@ public static class CertificateBuilder2Extensions
     /// <summary>
     ///     Get <seecref name="X509Name" /> from name components.
     /// </summary>
-    /// <param name="nameComponents">Nmae components.</param>
+    /// <param name="nameComponents">Name components.</param>
     /// <returns>Result.</returns>
     public static X509Name GetX509Name(Dictionary<DerObjectIdentifier, string> nameComponents)
     {
@@ -25,7 +25,7 @@ public static class CertificateBuilder2Extensions
     }
 
     /// <summary>
-    ///     Set authority key identifer.
+    ///     Set authority key identifier.
     /// </summary>
     /// <param name="builder"><seecref name="ICertificateBuilder" />.</param>
     /// <param name="authorityKeyPair"></param>

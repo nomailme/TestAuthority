@@ -47,11 +47,6 @@ public class CertificateBuilder2 : ICertificateBuilder
         return keyPair?.Public;
     }
 
-    public X509Name? GetIssuerName()
-    {
-        return issuerName;
-    }
-
     /// <inheritdoc />
     public ICertificateBuilder AddExtension(string oid, Asn1Encodable value, bool isCritical = false)
     {
@@ -129,7 +124,7 @@ public class CertificateBuilder2 : ICertificateBuilder
     /// <summary>
     ///     Generate key pair.
     /// </summary>
-    /// <param name="keyStrength">Key stregth.</param>
+    /// <param name="keyStrength">Key strength.</param>
     /// <param name="random"><see cref="SecureRandom" />.</param>
     /// <returns><see cref="AsymmetricCipherKeyPair" />.</returns>
     public static AsymmetricCipherKeyPair GenerateKeyPair(int keyStrength, SecureRandom random)

@@ -18,11 +18,11 @@ public class SignCertificateBehaviour : IPipelineBehavior<CertificateBuilderRequ
 
     public Task<CertificateWithKey> Handle(CertificateBuilderRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<CertificateWithKey> next)
     {
-        ISignatureFactory signatureFactory = new Asn1SignatureFactory(SignatureAlgorithm, request.SignerInfo.CertificateWithKey!.KeyPair.Private, randomService.GenerateRandom());
+        ISignatureFactory signatureFactory = new Asn1SignatureFactory(SignatureAlgorithm, request.SignerInfo.SignerCertificate.KeyPair.Private, randomService.GenerateRandom());
         request.CertificateGenerator.SetPublicKey(request.KeyPair!.Public);
 
         var certificate = request.CertificateGenerator.Generate(signatureFactory);
-        certificate.Verify(request.SignerInfo.CertificateWithKey.KeyPair.Public);
+        certificate.Verify(request.SignerInfo.SignerCertificate.KeyPair.Public);
 
         var result = new CertificateWithKey(certificate, request.KeyPair);
         return Task.FromResult(result);

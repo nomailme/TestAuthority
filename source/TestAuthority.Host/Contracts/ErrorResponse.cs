@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 
-namespace TestAuthority.Host.Contracts
+namespace TestAuthority.Host.Contracts;
+
+/// <summary>
+/// Error response contract.
+/// </summary>
+public class ErrorResponse
 {
     /// <summary>
-    /// Error response contract.
+    /// List of errors.
     /// </summary>
-    public class ErrorResponse
-    {
-        /// <summary>
-        /// List of errors.
-        /// </summary>
-        public List<ErrorModel> Errors { get; set; } = new();
-    }
+    // ReSharper disable once CollectionNeverQueried.Global
+    public List<ErrorModel> Errors { get; } = new();
 }

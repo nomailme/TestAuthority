@@ -36,9 +36,9 @@ public static class CertificateAuthorityExtensions
             var randomService = x.GetRequiredService<IRandomService>();
             var certificate = signerProvider.GetRootCertificate();
 
-            logger.LogInformation("Using root certificate: {NewLine}{Certificate}", Environment.NewLine, certificate.CertificateWithKey?.Certificate);
+            logger.LogInformation("Using root certificate: {NewLine}{Certificate}", Environment.NewLine, certificate.SignerCertificate.Certificate);
 
-            return new CertificateAuthorityService(certificate.CertificateWithKey, randomService);
+            return new CertificateAuthorityService(certificate.SignerCertificate, randomService);
         });
         services.AddCertificateGenerationPipeline();
     }
@@ -47,7 +47,7 @@ public static class CertificateAuthorityExtensions
     ///     Register certificate generation pipeline.
     /// </summary>
     /// <param name="services"><see cref="IServiceCollection" />.</param>
-    public static void AddCertificateGenerationPipeline(this IServiceCollection services)
+    private static void AddCertificateGenerationPipeline(this IServiceCollection services)
     {
         services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, KeyPairGenerationBehaviour>();
         services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, CommonNameBehaviour>();

@@ -10,5 +10,5 @@ public class PfxContainerOptions : IContainerOptions
     /// <summary>
     /// Pfx password.
     /// </summary>
-    public string? PfxPassword { get; set; }
+    public string? PfxPassword { get; init; }
 }

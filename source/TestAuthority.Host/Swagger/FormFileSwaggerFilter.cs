@@ -4,69 +4,66 @@ using System.Linq;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace TestAuthority.Host.Swagger
+namespace TestAuthority.Host.Swagger;
+
+/// <summary>
+/// AddSwaggerFileUploadButton.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class AddSwaggerFileUploadButtonAttribute : Attribute
 {
+}
+
+/// <summary>
+/// Filter to enable handling file upload in swagger
+/// </summary>
+public class AddFileParamTypesOperationFilter : IOperationFilter
+{
+    // ReSharper disable once InconsistentNaming
+    private static readonly string[] fileParameters = { "ContentType", "ContentDisposition", "Headers", "Length", "Name", "FileName" };
 
     /// <summary>
-    /// AddSwaggerFileUploadButton.
+    /// Apply filter.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
-    public class AddSwaggerFileUploadButtonAttribute : Attribute
+    /// <param name="operation"><seecref name="OpenApiOperation"/>.</param>
+    /// <param name="context"><seecref name="OperationFilterContext"/>.</param>
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-    }
+        var operationHasFileUploadButton = context.MethodInfo.GetCustomAttributes(true).OfType<AddSwaggerFileUploadButtonAttribute>().Any();
 
-    /// <summary>
-    /// Filter to enable handling file upload in swagger
-    /// </summary>
-    public class AddFileParamTypesOperationFilter : IOperationFilter
-    {
-        // ReSharper disable once InconsistentNaming
-        private static readonly string[] fileParameters = new[] { "ContentType", "ContentDisposition", "Headers", "Length", "Name", "FileName" };
-
-        /// <summary>
-        /// Apply filter.
-        /// </summary>
-        /// <param name="operation"><seecref name="OpenApiOperation"/>.</param>
-        /// <param name="context"><seecref name="OperationFilterContext"/>.</param>
-        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        if (!operationHasFileUploadButton)
         {
-            var operationHasFileUploadButton = context.MethodInfo.GetCustomAttributes(true).OfType<AddSwaggerFileUploadButtonAttribute>().Any();
-
-            if (!operationHasFileUploadButton)
+            return;
+        }
+        RemoveExistingFileParameters(operation.Parameters);
+        operation.RequestBody = new OpenApiRequestBody
+        {
+            Content =
             {
-                return;
-            }
-            RemoveExistingFileParameters(operation.Parameters);
-            operation.RequestBody = new OpenApiRequestBody()
-            {
-                Content =
+                ["multipart/form-data"] = new OpenApiMediaType
+                {
+                    Schema = new OpenApiSchema
                     {
-                        ["multipart/form-data"] = new OpenApiMediaType()
+                        Type = "object",
+                        Properties =
                         {
-                            Schema = new OpenApiSchema()
+                            ["file"] = new OpenApiSchema
                             {
-                                Type = "object",
-                                Properties =
-                                {
-                                    ["file"] = new OpenApiSchema()
-                                    {
-                                        Description = "Select file", Type = "string", Format = "binary"
-                                    }
-                                }
+                                Description = "Select file", Type = "string", Format = "binary"
                             }
                         }
                     }
-            };
-
-        }
-
-        private void RemoveExistingFileParameters(IList<OpenApiParameter> operationParameters)
-        {
-            foreach (var parameter in operationParameters.Where(p => p.In == 0 && fileParameters.Contains(p.Name)).ToList())
-            {
-                operationParameters.Remove(parameter);
+                }
             }
-        }
+        };
+
     }
 
+    private static void RemoveExistingFileParameters(IList<OpenApiParameter> operationParameters)
+    {
+        foreach (var parameter in operationParameters.Where(p => p.In == 0 && fileParameters.Contains(p.Name)).ToList())
+        {
+            operationParameters.Remove(parameter);
+        }
+    }
 }

@@ -26,8 +26,7 @@ public class PfxCertificateStore : ICertificateStore
     public bool Exists(string certificateName)
     {
         var path = GetCertificatePath(certificateName);
-        if (File.Exists(path)) return true;
-        return false;
+        return File.Exists(path);
     }
 
     /// <inheritdoc />
@@ -85,7 +84,7 @@ public class PfxCertificateStore : ICertificateStore
         return result;
     }
 
-    private byte[] ConvertToPfx(X509Certificate cert, RsaPrivateCrtKeyParameters rsaParams, string pfxPassword)
+    private byte[] ConvertToPfx(X509Certificate cert, AsymmetricKeyParameter rsaParams, string pfxPassword)
     {
         var store = new Pkcs12Store();
         var random = randomService.GenerateRandom();
