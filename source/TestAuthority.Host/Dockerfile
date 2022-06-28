@@ -27,4 +27,5 @@ EXPOSE 80
 
 WORKDIR /app
 COPY --from=publish /app/publish .
+RUN mkdir -p /usr/share/test-authority
 ENTRYPOINT ["dotnet", "TestAuthority.Host.dll"]
