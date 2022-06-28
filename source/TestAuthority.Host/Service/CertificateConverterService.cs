@@ -1,15 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
-using TestAuthority.Application;
 using TestAuthority.Application.Random;
 using TestAuthority.Domain.Models;
+using TestAuthority.Domain.Services;
 using X509Certificate = Org.BouncyCastle.X509.X509Certificate;
 
 namespace TestAuthority.Host.Service
@@ -20,17 +22,17 @@ namespace TestAuthority.Host.Service
     public class CertificateConverterService : ICertificateConverter
     {
         private readonly RandomService randomService;
-        private readonly RootCertificateService rootCertificateService;
+        private readonly ISignerProvider signerProvider;
 
         /// <summary>
         /// Ctor.
         /// </summary>
         /// <param name="randomService"><seecref name="RandomService"/>.</param>
-        /// <param name="rootCertificateService"><seecref name="RootCertificateService"/>.</param>
-        public CertificateConverterService(RandomService randomService, RootCertificateService rootCertificateService)
+        /// <param name="signerProvider"><see cref="ISignerProvider"/>.</param>
+        public CertificateConverterService(RandomService randomService, ISignerProvider signerProvider)
         {
             this.randomService = randomService;
-            this.rootCertificateService = rootCertificateService;
+            this.signerProvider = signerProvider;
         }
 
         /// <summary>
@@ -83,16 +85,68 @@ namespace TestAuthority.Host.Service
 
         private byte[] ConvertToPemArchiveCore(X509Certificate certificate, AsymmetricKeyParameter keyPair)
         {
-            var rootCertificateWithKey = rootCertificateService.GetRootCertificate();
-            var rootCertificate = rootCertificateWithKey.Certificate;
+            var signerInfo = signerProvider.GetRootCertificate();
+            var rootCertificate = GetRootCertificate(signerInfo);
+            var intermediateCertificates = GetIntermediateCertificates(signerInfo).ToList();
             using var stream = new MemoryStream();
             using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, true))
             {
                 WriteEntry("root.crt", rootCertificate, archive);
                 WriteEntry("private.key", keyPair, archive);
                 WriteEntry("certificate.crt", certificate, archive);
+                for (var index = 0; index < intermediateCertificates.Count; index++)
+                {
+                    var intermediate = intermediateCertificates[index];
+                    WriteEntry($"intermediate_{index + 1}.crt", intermediate, archive);
+                }
+                WriteFullChainEntry("fullchain.crt", certificate, intermediateCertificates, archive);
             }
             return stream.ToArray();
+        }
+
+        private void WriteFullChainEntry(string filename, X509Certificate certificate, List<X509Certificate> intermediate, ZipArchive archive)
+        {
+            var entryRecord = archive.CreateEntry(filename);
+            using var entryStream = entryRecord.Open();
+            using var binaryWriter = new BinaryWriter(entryStream);
+            var fullchain = new List<X509Certificate>
+            {
+                certificate
+            };
+            fullchain.AddRange(intermediate);
+
+            var stringBuilder = new StringBuilder();
+            foreach (var item    in fullchain)
+            {
+                var stringRepresentation = ConvertToPemFormat(item);
+                stringBuilder.AppendLine(stringRepresentation);
+
+            }
+
+            byte[] result = Encoding.ASCII.GetBytes(stringBuilder.ToString());
+            binaryWriter.Write(result);
+        }
+
+        private IEnumerable<X509Certificate> GetIntermediateCertificates(CertificateSignerInfo signerInfo)
+        {
+            if (signerInfo.Chain.Any())
+            {
+                foreach (var certificate in signerInfo.Chain.Skip(1))
+                {
+                    yield return certificate;
+                }
+                yield return signerInfo.CertificateWithKey!.Certificate;
+            }
+
+        }
+
+        private X509Certificate GetRootCertificate(CertificateSignerInfo signerInfo)
+        {
+            if (signerInfo.Chain.Any())
+            {
+                return signerInfo.Chain.First();
+            }
+            return signerInfo.CertificateWithKey!.Certificate;
         }
 
         private static void WriteEntry(string filename, object entry, ZipArchive archive)

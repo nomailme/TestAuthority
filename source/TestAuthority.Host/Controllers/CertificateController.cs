@@ -1,10 +1,12 @@
 ﻿using System.Linq;
 using System.Net.Mime;
+using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TestAuthority.Application;
+using TestAuthority.Application.CertificateBuilders;
 using TestAuthority.Domain.Models;
+using TestAuthority.Domain.Services;
 using TestAuthority.Host.Service;
-using CertificateRequestModel = TestAuthority.Host.Contracts.CertificateRequestModel;
 
 namespace TestAuthority.Host.Controllers
 {
@@ -15,22 +17,26 @@ namespace TestAuthority.Host.Controllers
     public class CertificateController : Controller
     {
         private readonly ICertificateConverter converter;
-        private readonly RootCertificateService rootCertificateService;
+        private readonly IMediator mediator;
+        private readonly ISignerProvider signerProvider;
         private readonly CertificateAuthorityService service;
 
         /// <summary>
         ///     Ctor.
         /// </summary>
         /// <param name="service"><seecref name="CertificateAuthorityService" />.</param>
-        /// <param name="rootCertificateService"><seecref name="RootCertificateService" />.</param>
+        /// <param name="signerProvider"><see cref="ISignerProvider"/>.</param>
         /// <param name="converter"><seecref name="ICertificateConverter" />.</param>
+        /// <param name="mediator"><see cref="IMediator"/>.</param>
         public CertificateController(CertificateAuthorityService service,
-            RootCertificateService rootCertificateService,
-            ICertificateConverter converter)
+            ISignerProvider signerProvider,
+            ICertificateConverter converter,
+            IMediator mediator)
         {
             this.service = service;
-            this.rootCertificateService = rootCertificateService;
+            this.signerProvider = signerProvider;
             this.converter = converter;
+            this.mediator = mediator;
         }
 
         /// <summary>
@@ -40,7 +46,7 @@ namespace TestAuthority.Host.Controllers
         [HttpGet("/api/certificate/root")]
         public IActionResult GetRootCertificate()
         {
-            var result = rootCertificateService.GetRootCertificate().Certificate.GetEncoded();
+            var result = signerProvider.GetRootCertificate().CertificateWithKey!.Certificate.GetEncoded();
             return File(result, MediaTypeNames.Application.Octet, "root.cer");
         }
 
@@ -63,9 +69,9 @@ namespace TestAuthority.Host.Controllers
         /// <param name="request">Certificate request.</param>
         /// <returns>Result.</returns>
         [HttpGet]
-        public IActionResult IssueCertificate(Contracts.CertificateRequestModel request)
+        public async Task<IActionResult> IssueCertificate(Contracts.CertificateRequestModel request)
         {
-            var certificateRequest = new TestAuthority.Domain.Models.CertificateRequestModel
+            var certificateRequest = new CertificateRequestModel
             {
                 CommonName = request.CommonName,
                 Hostnames = request.Hostname.ToList(),
@@ -74,19 +80,20 @@ namespace TestAuthority.Host.Controllers
             };
 
 
-            var certificateWithKey = service.GenerateSslCertificate(certificateRequest);
+            var crtRequest = new CertificateBuilderRequest(certificateRequest, signerProvider.GetRootCertificate());
+            var result = await mediator.Send(crtRequest);
 
 
             if (request.Format == OutputFormat.Pfx)
             {
                 var resultFilename = string.Concat(request.Filename.Trim('.'), ".pfx");
-                var pfx = converter.ConvertToPfx(certificateWithKey, request.Password);
+                var pfx = converter.ConvertToPfx(result, request.Password);
                 return File(pfx, MediaTypeNames.Application.Octet, resultFilename);
             }
             else
             {
                 var resultFilename = string.Concat(request.Filename.Trim('.'), ".zip");
-                var pem = converter.ConvertToPemArchive(certificateWithKey, resultFilename);
+                var pem = converter.ConvertToPemArchive(result, resultFilename);
                 return File(pem, MediaTypeNames.Application.Zip, resultFilename);
             }
         }

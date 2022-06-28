@@ -1,6 +1,5 @@
 using FluentValidation;
 using TestAuthority.Domain.Models;
-using CertificateRequestModel = TestAuthority.Host.Contracts.CertificateRequestModel;
 
 namespace TestAuthority.Host.Validators
 {

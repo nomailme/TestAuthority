@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="11.0.3" />
+    <PackageReference Include="MediatR" Version="10.0.1" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
     <PackageReference Include="Serilog" Version="2.11.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
@@ -20,6 +22,12 @@
   <ItemGroup>
     <ProjectReference Include="..\TestAuthority.Application\TestAuthority.Application.csproj" />
     <ProjectReference Include="..\TestAuthority.Domain\TestAuthority.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </Content>
   </ItemGroup>
 
 </Project>

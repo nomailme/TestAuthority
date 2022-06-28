@@ -74,12 +74,6 @@ public interface ICertificateBuilder
     /// </summary>
     /// <returns></returns>
     AsymmetricKeyParameter? GetPublicKeyInfo();
-
-    /// <summary>
-    /// Get the distinguished name of the issuer.
-    /// </summary>
-    /// <returns></returns>
-    X509Name? GetIssuerName();
 }
 
 /// <summary>

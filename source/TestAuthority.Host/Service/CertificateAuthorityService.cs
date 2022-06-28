@@ -2,7 +2,6 @@
 using Org.BouncyCastle.Security;
 using Serilog;
 using TestAuthority.Application;
-using TestAuthority.Application.Random;
 using TestAuthority.Domain.Models;
 using TestAuthority.Domain.Services;
 
@@ -15,16 +14,18 @@ namespace TestAuthority.Host.Service
     {
         private readonly Func<SecureRandom, CertificateWithKey, CertificateBuilder2> builderFactory;
         private readonly Func<SecureRandom, CertificateWithKey, ICrlBuilder> crlBuilderFactory;
-        private readonly RandomService randomService;
+        private readonly IRandomService randomService;
         private readonly CertificateWithKey signerCertificate;
         private readonly ILogger logger = Log.ForContext<CertificateAuthorityService>();
+        private readonly CertificateSignerInfo signerInfo;
 
         /// <summary>
         ///     Ctor.
         /// </summary>
-        public CertificateAuthorityService(CertificateWithKey signerCertificate, RandomService randomService)
+        public CertificateAuthorityService(CertificateWithKey signerCertificate, IRandomService randomService)
         {
             this.signerCertificate = signerCertificate;
+            this.signerInfo = new CertificateSignerInfo { CertificateWithKey = signerCertificate };
             this.randomService = randomService;
             builderFactory = (random, _) => new CertificateBuilder2(random);
             crlBuilderFactory = (random, issuer) => new CrlBuilder(random, issuer);
@@ -59,9 +60,10 @@ namespace TestAuthority.Host.Service
 
             var signerSubject = signerCertificate.Certificate.IssuerDN;
 
-            var certificate = builder.WithSubjectCommonName(requestModel.CommonName)
+            var certificate = builder
+                .WithSubjectCommonName(requestModel.CommonName)
                 .WithKeyPair(keyPair)
-                .WithIssuerName(signerSubject)
+                .WithIssuerName(signerSubject) //TODO:
                 .WithNotAfter(notAfter)
                 .WithNotBefore(notBefore)
                 .WithSubjectAlternativeName(requestModel.Hostnames, requestModel.IpAddresses)
@@ -75,5 +77,11 @@ namespace TestAuthority.Host.Service
 
 
         }
+
+        /// <summary>
+        /// Provides signer information.
+        /// </summary>
+        /// <returns></returns>
+        public CertificateSignerInfo GetSignerInfo() => signerInfo;
     }
 }

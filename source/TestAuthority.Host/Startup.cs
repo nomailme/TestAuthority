@@ -1,12 +1,15 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TestAuthority.Application;
 using TestAuthority.Application.Random;
 using TestAuthority.Host.Filters;
 using TestAuthority.Host.Extensions;
+using TestAuthority.Host.Service;
 
 namespace TestAuthority.Host
 {
@@ -66,6 +69,8 @@ namespace TestAuthority.Host
 
             services.AddSwagger();
             services.AddSingleton<RandomService>();
+            services.AddMediatR(typeof(Startup));
+            services.AddSingleton<ITimeServer,TimeServer>();
             services.AddCertificateAuthorityService();
         }
     }
