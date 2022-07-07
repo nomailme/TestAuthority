@@ -34,7 +34,7 @@ public interface ICertificateBuilder
     ICertificateBuilder WithIssuerName(X509Name issuer);
 
     /// <summary>
-    ///     Set cerficate not after date.
+    ///     Set certificate not after date.
     /// </summary>
     /// <param name="notAfter">Date.</param>
     /// <returns><seecref name="ICertificateBuilder" />.</returns>
@@ -42,7 +42,7 @@ public interface ICertificateBuilder
 
 
     /// <summary>
-    ///     Set cerficate not before date.
+    ///     Set certificate not before date.
     /// </summary>
     /// <param name="notBefore">Date.</param>
     /// <returns><seecref name="ICertificateBuilder" />.</returns>
@@ -56,7 +56,7 @@ public interface ICertificateBuilder
     ICertificateBuilder WithSubject(X509Name subject);
 
     /// <summary>
-    ///     Set basic contstraints for the certificate.
+    ///     Set basic constraints for the certificate.
     /// </summary>
     /// <param name="constrains"><seecref name="BasicContstrainsConstants" />.</param>
     /// <returns><seecref name="ICertificateBuilder" />.</returns>

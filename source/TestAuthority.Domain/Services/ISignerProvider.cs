@@ -8,5 +8,5 @@ public interface ISignerProvider
     ///     Get root certificate.
     /// </summary>
     /// <returns>Root certificate.</returns>
-    CertificateSignerInfo GetRootCertificate();
+    CertificateSignerInfo GetCertificateSignerInfo();
 }

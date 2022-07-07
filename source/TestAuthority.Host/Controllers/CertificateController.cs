@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TestAuthority.Application.CertificateBuilders;
+using TestAuthority.Application.Extensions;
 using TestAuthority.Domain.Models;
 using TestAuthority.Domain.Services;
 using TestAuthority.Host.Service;
@@ -19,21 +20,18 @@ public class CertificateController : Controller
     private readonly ICertificateConverter converter;
     private readonly IMediator mediator;
     private readonly ISignerProvider signerProvider;
-    private readonly CertificateAuthorityService service;
 
     /// <summary>
     ///     Ctor.
     /// </summary>
-    /// <param name="service"><seecref name="CertificateAuthorityService" />.</param>
     /// <param name="signerProvider"><see cref="ISignerProvider"/>.</param>
     /// <param name="converter"><seecref name="ICertificateConverter" />.</param>
     /// <param name="mediator"><see cref="IMediator"/>.</param>
-    public CertificateController(CertificateAuthorityService service,
+    public CertificateController(
         ISignerProvider signerProvider,
         ICertificateConverter converter,
         IMediator mediator)
     {
-        this.service = service;
         this.signerProvider = signerProvider;
         this.converter = converter;
         this.mediator = mediator;
@@ -46,22 +44,9 @@ public class CertificateController : Controller
     [HttpGet("/api/certificate/root")]
     public IActionResult GetRootCertificate()
     {
-        var result = signerProvider.GetRootCertificate().SignerCertificate.Certificate.GetEncoded();
+        var result = signerProvider.GetCertificateSignerInfo().GetSignerCertificate().GetEncoded();
         return File(result, MediaTypeNames.Application.Octet, "root.cer");
     }
-
-    /// <summary>
-    ///     Generate current Crl.
-    /// </summary>
-    /// <returns>Certificate.</returns>
-    [HttpGet("/api/certificate/crl")]
-    public IActionResult GetCrl()
-    {
-        var crl = service.GenerateCrl();
-        var result = converter.ConvertToPem(crl);
-        return File(result, MediaTypeNames.Application.Octet, "root.crl");
-    }
-
 
     /// <summary>
     ///     Issue a certificate. Export in PFX format.
@@ -80,7 +65,7 @@ public class CertificateController : Controller
         };
 
 
-        var crtRequest = new CertificateBuilderRequest(certificateRequest, signerProvider.GetRootCertificate());
+        var crtRequest = new CertificateBuilderRequest(certificateRequest, signerProvider.GetCertificateSignerInfo().GetSignerCertificate());
         var result = await mediator.Send(crtRequest);
 
 

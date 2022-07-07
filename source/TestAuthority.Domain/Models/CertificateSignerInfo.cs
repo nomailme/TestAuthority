@@ -1,13 +1,23 @@
 using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.X509;
 
 namespace TestAuthority.Domain.Models;
 
-public record CertificateSignerInfo(CertificateWithKey SignerCertificate, List<X509Certificate>? Chain)
+/// <summary>
+/// Signer information.
+/// </summary>
+/// <param name="CertificateChain"></param>
+public record CertificateSignerInfo(List<CertificateWithKey> CertificateChain)
 {
-    public CertificateWithKey SignerCertificate { get; } = SignerCertificate;
+    public X509Name? Subject => CertificateChain.First().Certificate.SubjectDN;
 
-    public X509Name? Subject => SignerCertificate.Certificate.SubjectDN;
-
-    public List<X509Certificate> Chain { get; } = Chain ?? new List<X509Certificate>();
+    /// <summary>
+    /// Chain of the certificates with keys.
+    /// </summary>
+    /// <remarks>
+    /// The first element of the list is a certificate used to sign certificates and crls.
+    /// The last element is the root certificate.
+    /// If the list contains only one certificate, then the root certificate will be used to sign end certifcates.
+    /// Elements [1..n-1] are intermediate certificates.
+    /// </remarks>
+    public List<CertificateWithKey> CertificateChain { get; } = CertificateChain;
 }

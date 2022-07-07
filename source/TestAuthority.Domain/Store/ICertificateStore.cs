@@ -9,21 +9,6 @@ namespace TestAuthority.Domain.Store;
 public interface ICertificateStore
 {
     /// <summary>
-    /// Check whether certificate exists in store.
-    /// </summary>
-    /// <param name="certificateName">Certificate name.</param>
-    /// <returns>True if exists.</returns>
-    bool Exists(string certificateName);
-
-    /// <summary>
-    /// Get certificate from the store.
-    /// </summary>
-    /// <param name="certificateName">Certificate name</param>
-    /// <param name="options">Options.</param>
-    /// <returns><see cref="CertificateWithKey"/>.</returns>
-    CertificateWithKey GetCertificate(string certificateName, IContainerOptions options);
-
-    /// <summary>
     /// Save certificate to the store.
     /// </summary>
     /// <param name="certificateName">Certificate name.</param>

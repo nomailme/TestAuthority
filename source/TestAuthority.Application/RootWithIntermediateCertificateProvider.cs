@@ -1,7 +1,6 @@
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Security;
-using Org.BouncyCastle.X509;
 using TestAuthority.Application.Store;
 using TestAuthority.Domain.Models;
 using TestAuthority.Domain.Services;
@@ -12,7 +11,7 @@ namespace TestAuthority.Application;
 /// <summary>
 ///     Provides methods for root certificate management.
 /// </summary>
-public class RootWithIntermediateCertificateService : ISignerProvider
+public class RootWithIntermediateCertificateProvider : ISignerProvider
 {
     private const string RootCertificateName = "Root";
     private const string IntermediateCertificateName = "intermediate";
@@ -25,7 +24,7 @@ public class RootWithIntermediateCertificateService : ISignerProvider
     /// <summary>
     ///     Ctor.
     /// </summary>
-    public RootWithIntermediateCertificateService(ICertificateStore certificateStore, IRandomService randomService)
+    public RootWithIntermediateCertificateProvider(ICertificateStore certificateStore, IRandomService randomService)
     {
         this.certificateStore = certificateStore;
         this.randomService = randomService;
@@ -36,7 +35,7 @@ public class RootWithIntermediateCertificateService : ISignerProvider
     ///     Get root certificate.
     /// </summary>
     /// <returns>Root certificate.</returns>
-    public CertificateSignerInfo GetRootCertificate()
+    public CertificateSignerInfo GetCertificateSignerInfo()
     {
         if (!certificateStore.TryGet(RootCertificateName, new PfxContainerOptions{ PfxPassword = Password}, out var rootCertificate))
         {
@@ -50,7 +49,10 @@ public class RootWithIntermediateCertificateService : ISignerProvider
             certificateStore.SaveCertificate(IntermediateCertificateName, intermediateCertificate, new PfxContainerOptions{ PfxPassword = Password});
         }
 
-        return new CertificateSignerInfo(intermediateCertificate, new List<X509Certificate> { rootCertificate.Certificate });
+        var chain = new List<CertificateWithKey> { intermediateCertificate, rootCertificate };
+
+
+        return new CertificateSignerInfo(chain);
     }
 
     private CertificateWithKey GenerateIntermediateCertificate(CertificateWithKey signerCertificate)

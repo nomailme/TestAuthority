@@ -59,7 +59,7 @@ public class AddFileParamTypesOperationFilter : IOperationFilter
 
     }
 
-    private static void RemoveExistingFileParameters(IList<OpenApiParameter> operationParameters)
+    private static void RemoveExistingFileParameters(ICollection<OpenApiParameter> operationParameters)
     {
         foreach (var parameter in operationParameters.Where(p => p.In == 0 && fileParameters.Contains(p.Name)).ToList())
         {

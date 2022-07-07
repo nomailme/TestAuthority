@@ -7,7 +7,7 @@ public class IssuerNameBehaviour : IPipelineBehavior<CertificateBuilderRequest, 
 {
     public Task<CertificateWithKey> Handle(CertificateBuilderRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<CertificateWithKey> next)
     {
-        request.CertificateGenerator.SetIssuerDN(request.SignerInfo.Subject);
+        request.CertificateGenerator.SetIssuerDN(request.SignerCertificate.SubjectDN);
         return next();
     }
 }

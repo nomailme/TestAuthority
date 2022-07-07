@@ -1,66 +1,54 @@
-﻿using System;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using FluentValidation.AspNetCore;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using TestAuthority.Application;
+using TestAuthority.Application.Random;
+using TestAuthority.Domain.Services;
+using TestAuthority.Host.Extensions;
+using TestAuthority.Host.Filters;
+using TestAuthority.Host.Service;
 
-namespace TestAuthority.Host;
-
-/// <summary>
-///     The one and only.
-/// </summary>
-public class Program
+var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog(((context, services, configuration) =>
 {
-    /// <summary>
-    ///     The mainest of them all.
-    /// </summary>
-    /// <param name="args">Arguments.</param>
-    public static void Main(string[] args)
-    {
-        Log.Logger = new LoggerConfiguration()
-            .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .CreateLogger();
+    configuration.ReadFrom.Configuration(context.Configuration);
+    configuration.ReadFrom.Services(services);
+    configuration.Enrich.FromLogContext();
+    configuration.WriteTo.Console();
+}));
 
-        try
-        {
-            CreateHostBuilder(args)
-                .Build()
-                .Run();
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "Application start-up failed");
-        }
-        finally
-        {
-            Log.CloseAndFlush();
-        }
-    }
+builder.Services
+    .AddControllers(x => x.Filters.Add<ValidationFilter>())
+    .AddJsonOptions(ConfigureJson)
+    .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining<Program>());
 
-    /// <summary>
-    ///     Create a <seecref name="IWebHostBuilder" />.
-    /// </summary>
-    /// <param name="args">Arguments</param>
-    /// <returns>
-    ///     <seecref name="IWebHostBuilder" />
-    /// </returns>
-    public static IHostBuilder CreateHostBuilder(string[] args)
-    {
-        return Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
-            .UseSerilog((context, services, configuration) =>
-            {
-                configuration
-                    .ReadFrom.Configuration(context.Configuration)
-                    .ReadFrom.Services(services)
-                    .Enrich.FromLogContext()
-                    .WriteTo.Console();
-            })
-            .ConfigureWebHostDefaults(x => x.UseStartup<Startup>())
-            .ConfigureAppConfiguration(((context, builder) =>
-            {
-                builder.AddJsonFile("appsettings.json", true, false);
-                builder.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", true, false);
-            }));
-    }
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwagger();
+builder.Services.AddMediatR(typeof(Program));
+builder.Services.AddSingleton<ITimeServer, TimeServer>();
+builder.Services.AddSingleton<IRandomService, RandomService>();
+builder.Services.AddCertificateAuthorityService();
+
+
+var app = builder.Build();
+app.UseSwagger();
+app.UseSwaggerUI(config =>
+{
+    config.SwaggerEndpoint("/swagger/v1/swagger.json", "Personal Signing Center");
+    config.RoutePrefix = string.Empty;
+});
+
+app.MapControllers();
+app.Run();
+
+void ConfigureJson(JsonOptions options)
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 }

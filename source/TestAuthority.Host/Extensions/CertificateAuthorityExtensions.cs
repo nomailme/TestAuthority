@@ -1,11 +1,13 @@
-using System;
 using MediatR;
+using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using TestAuthority.Application;
 using TestAuthority.Application.CertificateBuilders;
 using TestAuthority.Application.CertificateBuilders.CertificateBuilderSteps;
+using TestAuthority.Application.CrlBuilders;
+using TestAuthority.Application.CrlBuilders.CrlBuilderSteps;
 using TestAuthority.Application.Random;
+using TestAuthority.Application.SignatureFactoryProviders;
 using TestAuthority.Application.Store;
 using TestAuthority.Domain.Models;
 using TestAuthority.Domain.Services;
@@ -28,19 +30,10 @@ public static class CertificateAuthorityExtensions
         services.AddSingleton<ICertificateStore, PfxCertificateStore>();
         services.AddSingleton<IRandomService, RandomService>();
         services.AddSingleton<ICertificateConverter, CertificateConverterService>();
-        services.AddSingleton<ISignerProvider, RootWithIntermediateCertificateService>();
-        services.AddSingleton(x =>
-        {
-            var logger = x.GetRequiredService<ILogger<Startup>>();
-            var signerProvider = x.GetRequiredService<ISignerProvider>();
-            var randomService = x.GetRequiredService<IRandomService>();
-            var certificate = signerProvider.GetRootCertificate();
-
-            logger.LogInformation("Using root certificate: {NewLine}{Certificate}", Environment.NewLine, certificate.SignerCertificate.Certificate);
-
-            return new CertificateAuthorityService(certificate.SignerCertificate, randomService);
-        });
+        services.AddSingleton<ISignerProvider, RootWithIntermediateCertificateProvider>();
         services.AddCertificateGenerationPipeline();
+        services.AddCrlGenerationPipeline();
+        services.AddSingleton<ISignatureFactoryProvider, GostSignatureFactoryProvider>();
     }
 
     /// <summary>
@@ -49,7 +42,8 @@ public static class CertificateAuthorityExtensions
     /// <param name="services"><see cref="IServiceCollection" />.</param>
     private static void AddCertificateGenerationPipeline(this IServiceCollection services)
     {
-        services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, KeyPairGenerationBehaviour>();
+        services.AddScoped<IRequestPreProcessor<CertificateBuilderRequest>, KeyPairGenerationBehaviour>();
+
         services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, CommonNameBehaviour>();
         services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, IssuerNameBehaviour>();
         services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, SerialNumberBehaviour>();
@@ -59,5 +53,16 @@ public static class CertificateAuthorityExtensions
         services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, ExtendedKeyUsageExtensionBehaviour>();
         services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, AuthorityKeyIdentifierExtensionBehavior>();
         services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, SignCertificateBehaviour>();
+
+        services.AddScoped<IRequestPostProcessor<CertificateBuilderRequest, CertificateWithKey>, CertificateLoggingPostProcessor>();
+    }
+
+    /// <summary>
+    ///     Register Crl generation pipeline.
+    /// </summary>
+    /// <param name="services"><see cref="IServiceCollection" />.</param>
+    private static void AddCrlGenerationPipeline(this IServiceCollection services)
+    {
+        services.AddScoped<IPipelineBehavior<CrlBuilderRequest, CrlFileModel>, GenerateCrlBehaviour>();
     }
 }

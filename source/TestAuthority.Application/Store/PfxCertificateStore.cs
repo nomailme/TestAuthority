@@ -22,8 +22,8 @@ public class PfxCertificateStore : ICertificateStore
         this.randomService = randomService;
     }
 
-    /// <inheritdoc />
-    public bool Exists(string certificateName)
+
+    private bool Exists(string certificateName)
     {
         var path = GetCertificatePath(certificateName);
         return File.Exists(path);
@@ -41,8 +41,7 @@ public class PfxCertificateStore : ICertificateStore
         return true;
     }
 
-    /// <inheritdoc />
-    public CertificateWithKey GetCertificate(string certificateName, IContainerOptions options)
+    private CertificateWithKey GetCertificate(string certificateName, IContainerOptions options)
     {
         if (options is PfxContainerOptions pfxOptions == false) throw new ArgumentException("Options must be of type PfxContainerOptions", nameof(options));
         var path = GetCertificatePath(certificateName);

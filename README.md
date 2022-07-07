@@ -1,7 +1,5 @@
 # TestAuthority
 
-[![Build status](https://ci.appveyor.com/api/projects/status/9xmg595d0ps2r0uw?svg=true)](https://ci.appveyor.com/project/nomailme/testauthority)
-
 Provides an easy way to issue SSL certificate(PFX,PEM) for a specific host.
 Contains tools for conversion to/from PEM format from/to PFX (PKCS12)
 
@@ -24,11 +22,15 @@ To start project in docker container
 
 Issue certificate for example.com
 
-`http://localhost:5000/api/certificate?hostname=example.com&ipaddress=10.10.1.10`
+`http://localhost:5000/api/certificate?commonName=test-certificate&hostname=example.com&ipaddress=10.10.1.10&format=pem`
 
 Get root certificate
 
 `http://localhost:5000/api/certificate/root`
+
+Get dummy CRL file
+
+`http://localhost:5000/api/crl`
 
 # Docker
 
@@ -39,7 +41,3 @@ https://hub.docker.com/r/nomail/test-authority/
 You can use swagger UI for simple and explicit certificate issue.
 
 `http://localhost:5000`
-
-# Additional info
-
-Docker file included but is not complete at the moment

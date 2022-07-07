@@ -8,37 +8,36 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
-using Org.BouncyCastle.Security;
-using TestAuthority.Application.Random;
+using Org.BouncyCastle.X509;
+using TestAuthority.Application.Extensions;
 using TestAuthority.Domain.Models;
 using TestAuthority.Domain.Services;
-using X509Certificate = Org.BouncyCastle.X509.X509Certificate;
 
 namespace TestAuthority.Host.Service;
 
 /// <summary>
-/// Service that provides conversion of certificates to <seecref name="CerficateWithKey"/>.
+///     Service that provides conversion of certificates to <seecref name="CerficateWithKey" />.
 /// </summary>
 public class CertificateConverterService : ICertificateConverter
 {
-    private readonly RandomService randomService;
+    private readonly IRandomService randomService;
     private readonly ISignerProvider signerProvider;
 
     /// <summary>
-    /// Ctor.
+    ///     Ctor.
     /// </summary>
-    /// <param name="randomService"><seecref name="RandomService"/>.</param>
-    /// <param name="signerProvider"><see cref="ISignerProvider"/>.</param>
-    public CertificateConverterService(RandomService randomService, ISignerProvider signerProvider)
+    /// <param name="randomService"><seecref name="RandomService" />.</param>
+    /// <param name="signerProvider"><see cref="ISignerProvider" />.</param>
+    public CertificateConverterService(IRandomService randomService, ISignerProvider signerProvider)
     {
         this.randomService = randomService;
         this.signerProvider = signerProvider;
     }
 
     /// <summary>
-    /// Convert certificate to zip archive with certificate and key in PEM format.
+    ///     Convert certificate to zip archive with certificate and key in PEM format.
     /// </summary>
-    /// <param name="certificate"><seecref name="CerficateWithKey"/>.</param>
+    /// <param name="certificate"><seecref name="CerficateWithKey" />.</param>
     /// <returns></returns>
     public byte[] ConvertToPemArchive(CertificateWithKey certificate)
     {
@@ -46,14 +45,15 @@ public class CertificateConverterService : ICertificateConverter
     }
 
     /// <summary>
-    /// Convert certificate to pfx file.
+    ///     Convert certificate to pfx file.
     /// </summary>
-    /// <param name="certificate"><seecref name="certificate"/></param>
+    /// <param name="certificate">
+    ///     <seecref name="certificate" />
+    /// </param>
     /// <param name="password">Password for pfx file.</param>
     /// <returns>Pfx file as a byte array.</returns>
     public byte[] ConvertToPfx(CertificateWithKey certificate, string password)
     {
-
         return ConvertToPfxCore(certificate.Certificate, (RsaPrivateCrtKeyParameters)certificate.KeyPair.Private, password);
     }
 
@@ -64,11 +64,11 @@ public class CertificateConverterService : ICertificateConverter
         return Encoding.ASCII.GetBytes(pem);
     }
 
-    private byte[] ConvertToPfxCore(X509Certificate certificate, RsaPrivateCrtKeyParameters rsaParams, string pfxPassword)
+    private byte[] ConvertToPfxCore(X509Certificate certificate, AsymmetricKeyParameter rsaParams, string pfxPassword)
     {
         var store = new Pkcs12Store();
-        SecureRandom random = randomService.GenerateRandom();
-        string friendlyName = certificate.SubjectDN.ToString();
+        var random = randomService.GenerateRandom();
+        var friendlyName = certificate.SubjectDN.ToString();
         var certificateEntry = new X509CertificateEntry(certificate);
 
         store.SetCertificateEntry(friendlyName, certificateEntry);
@@ -84,9 +84,9 @@ public class CertificateConverterService : ICertificateConverter
 
     private byte[] ConvertToPemArchiveCore(X509Certificate certificate, AsymmetricKeyParameter keyPair)
     {
-        var signerInfo = signerProvider.GetRootCertificate();
-        var rootCertificate = GetRootCertificate(signerInfo);
-        var intermediateCertificates = GetIntermediateCertificates(signerInfo).ToList();
+        var signerInfo = signerProvider.GetCertificateSignerInfo();
+        var rootCertificate = signerInfo.GetRootCertificate();
+        var intermediateCertificates = signerInfo.GetIntermediateCertificates().Select(x => x.Certificate).ToList();
         using var stream = new MemoryStream();
         using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, true))
         {
@@ -108,44 +108,18 @@ public class CertificateConverterService : ICertificateConverter
         var entryRecord = archive.CreateEntry(filename);
         using var entryStream = entryRecord.Open();
         using var binaryWriter = new BinaryWriter(entryStream);
-        var fullchain = new List<X509Certificate>
-        {
-            certificate
-        };
+        var fullchain = new List<X509Certificate> { certificate };
         fullchain.AddRange(intermediate);
 
         var stringBuilder = new StringBuilder();
-        foreach (var item    in fullchain)
+        foreach (var item in fullchain)
         {
             var stringRepresentation = ConvertToPemFormat(item);
             stringBuilder.AppendLine(stringRepresentation);
-
         }
 
-        byte[] result = Encoding.ASCII.GetBytes(stringBuilder.ToString());
+        var result = Encoding.ASCII.GetBytes(stringBuilder.ToString());
         binaryWriter.Write(result);
-    }
-
-    private static IEnumerable<X509Certificate> GetIntermediateCertificates(CertificateSignerInfo signerInfo)
-    {
-        if (signerInfo.Chain.Any())
-        {
-            foreach (var certificate in signerInfo.Chain.Skip(1))
-            {
-                yield return certificate;
-            }
-            yield return signerInfo.SignerCertificate.Certificate;
-        }
-
-    }
-
-    private static X509Certificate GetRootCertificate(CertificateSignerInfo signerInfo)
-    {
-        if (signerInfo.Chain.Any())
-        {
-            return signerInfo.Chain.First();
-        }
-        return signerInfo.SignerCertificate.Certificate;
     }
 
     private static void WriteEntry(string filename, object entry, ZipArchive archive)
@@ -154,7 +128,7 @@ public class CertificateConverterService : ICertificateConverter
         using var entryStream = entryRecord.Open();
         using var binaryWriter = new BinaryWriter(entryStream);
         var stringRepresentation = ConvertToPemFormat(entry);
-        byte[] result = Encoding.ASCII.GetBytes(stringRepresentation);
+        var result = Encoding.ASCII.GetBytes(stringRepresentation);
         binaryWriter.Write(result);
     }
 
