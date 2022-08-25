@@ -1,4 +1,4 @@
-namespace TestAuthority.Application;
+namespace TestAuthority.Domain;
 
 public interface ITimeServer
 {

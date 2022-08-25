@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TestAuthority.Application.CrlBuilders;
+using TestAuthority.Domain.CertificateConverters;
 using TestAuthority.Domain.Services;
-using TestAuthority.Host.Service;
 
 namespace TestAuthority.Host.Controllers;
 

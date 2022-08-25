@@ -9,6 +9,7 @@ WORKDIR /src
 COPY ["source/TestAuthority.Host/TestAuthority.Host.csproj", "TestAuthority.Host/"]
 COPY ["source/TestAuthority.Application/TestAuthority.Application.csproj", "TestAuthority.Application/"]
 COPY ["source/TestAuthority.Domain/TestAuthority.Domain.csproj", "TestAuthority.Domain/"]
+COPY ["source/TestAuthority.Infrastructure/TestAuthority.Infrastructure.csproj", "TestAuthority.Infrastructure/"]
 RUN dotnet restore "/src/TestAuthority.Host/TestAuthority.Host.csproj"
 COPY . .
 RUN ls -al

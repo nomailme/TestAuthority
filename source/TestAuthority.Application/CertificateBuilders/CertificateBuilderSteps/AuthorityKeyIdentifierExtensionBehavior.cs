@@ -1,7 +1,6 @@
 using MediatR;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.X509;
-using TestAuthority.Application.Extensions;
 using TestAuthority.Domain.Models;
 
 namespace TestAuthority.Application.CertificateBuilders.CertificateBuilderSteps;

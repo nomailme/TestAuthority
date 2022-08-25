@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Text;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -10,10 +6,11 @@ using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.X509;
 using TestAuthority.Application.Extensions;
+using TestAuthority.Domain.CertificateConverters;
 using TestAuthority.Domain.Models;
 using TestAuthority.Domain.Services;
 
-namespace TestAuthority.Host.Service;
+namespace TestAuthority.Application.CertificateConverters;
 
 /// <summary>
 ///     Service that provides conversion of certificates to <seecref name="CerficateWithKey" />.

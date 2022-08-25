@@ -1,6 +1,6 @@
 using TestAuthority.Domain.Models;
 
-namespace TestAuthority.Host.Service;
+namespace TestAuthority.Domain.CertificateConverters;
 
 /// <summary>
 /// Provides methods to convert certificates and keys.

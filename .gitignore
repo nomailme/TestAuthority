@@ -262,3 +262,5 @@ __pycache__/
 *.pyc
 Source/TestAuthority.Web/Properties/PublishProfiles/CustomProfile.pubxml
 Source/TestAuthority.Web/Properties/PublishProfiles/CustomProfile1.pubxml
+
+.vscode/**

@@ -5,9 +5,9 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TestAuthority.Application.CertificateBuilders;
 using TestAuthority.Application.Extensions;
+using TestAuthority.Domain.CertificateConverters;
 using TestAuthority.Domain.Models;
 using TestAuthority.Domain.Services;
-using TestAuthority.Host.Service;
 
 namespace TestAuthority.Host.Controllers;
 

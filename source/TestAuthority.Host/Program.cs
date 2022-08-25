@@ -4,14 +4,16 @@ using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using TestAuthority.Application;
 using TestAuthority.Application.Random;
+using TestAuthority.Domain;
 using TestAuthority.Domain.Services;
 using TestAuthority.Host.Extensions;
 using TestAuthority.Host.Filters;
-using TestAuthority.Host.Service;
+using TestAuthority.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog(((context, services, configuration) =>
@@ -29,10 +31,16 @@ builder.Services
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwagger();
+
 builder.Services.AddMediatR(typeof(Program));
 builder.Services.AddSingleton<ITimeServer, TimeServer>();
 builder.Services.AddSingleton<IRandomService, RandomService>();
 builder.Services.AddCertificateAuthorityService();
+builder.Services.AddCertificateGenerationPipeline();
+builder.Services.AddCrlGenerationPipeline();
+
+builder.Services.Configure<CrlSettings>(builder.Configuration.GetSection("CrlSettings"));
+builder.Configuration.AddEnvironmentVariables();
 
 
 var app = builder.Build();

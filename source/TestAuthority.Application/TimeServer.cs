@@ -1,7 +1,6 @@
-using System;
-using TestAuthority.Application;
+using TestAuthority.Domain;
 
-namespace TestAuthority.Host.Service;
+namespace TestAuthority.Application;
 
 /// <inheritdoc />
 public class TimeServer: ITimeServer

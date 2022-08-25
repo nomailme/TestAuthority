@@ -4,6 +4,7 @@ using Org.BouncyCastle.Math;
 using Org.BouncyCastle.X509.Extension;
 using TestAuthority.Application.Extensions;
 using TestAuthority.Application.SignatureFactoryProviders;
+using TestAuthority.Domain;
 using TestAuthority.Domain.Models;
 
 namespace TestAuthority.Application.CrlBuilders.CrlBuilderSteps;

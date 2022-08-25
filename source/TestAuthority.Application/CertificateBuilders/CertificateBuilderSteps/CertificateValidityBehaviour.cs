@@ -1,4 +1,5 @@
 using MediatR;
+using TestAuthority.Domain;
 using TestAuthority.Domain.Models;
 
 namespace TestAuthority.Application.CertificateBuilders.CertificateBuilderSteps;
