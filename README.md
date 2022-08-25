@@ -16,13 +16,17 @@ To start project in docker container
 
 `docker run -p 5000:80 -d nomail/test-authority:latest`
 
-`docker run \
+or
+
+```
+docker run \
 -p 5000:80 \
 -v /usr/share/test-authority:/usr/share/test-authority \
 -e CrlSettings__CrlDistributionPoints__0=http://example.com/root.crl \
 -e CrlSettings__CrlDistributionPoints__0=http://example.com/root1.crl \
 -d \
- nomail/test-authority:latest`
+ nomail/test-authority:latest
+```
 
 # Usage
 
