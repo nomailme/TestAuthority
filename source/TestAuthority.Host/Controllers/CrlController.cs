@@ -39,8 +39,6 @@ public class CrlController: Controller
     {
         var signer = signerProvider.GetCertificateSignerInfo();
         var crl = await mediator.Send(new CrlBuilderRequest(signer));
-
-        var result = converter.ConvertToPem(crl);
-        return File(result, "application/pkix-crl", "root.crl");
+        return File(crl.Crl.GetEncoded(), "application/pkix-crl", "root.crl");
     }
 }
