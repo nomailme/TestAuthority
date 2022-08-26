@@ -41,6 +41,6 @@ public class CrlController: Controller
         var crl = await mediator.Send(new CrlBuilderRequest(signer));
 
         var result = converter.ConvertToPem(crl);
-        return File(result, MediaTypeNames.Application.Octet, "root.crl");
+        return File(result, "application/pkix-crl", "root.crl");
     }
 }
