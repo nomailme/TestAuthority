@@ -32,13 +32,27 @@ public class CrlController: Controller
     }
 
     /// <summary>
-    /// Issue a Certificate Revocation List.
+    /// Issue a Certificate Revocation List in PEM.
     /// </summary>
     [HttpGet]
     public async Task<FileContentResult> Get()
     {
         var signer = signerProvider.GetCertificateSignerInfo();
         var crl = await mediator.Send(new CrlBuilderRequest(signer));
-        return File(crl.Crl.GetEncoded(), "application/pkix-crl", "root.crl");
+
+        var result = converter.ConvertToPem(crl);
+        return File(result, MediaTypeNames.Application.Octet, "root.crl");
+    }
+
+    /// <summary>
+    /// Issue a Certificate Revocation List in DER.
+    /// </summary>
+    [HttpGet("root.crl")]
+    public async Task<FileResult> GetCrl()
+    {
+        var signer = signerProvider.GetCertificateSignerInfo();
+        var crlModel = await mediator.Send(new CrlBuilderRequest(signer));
+
+        return File(crlModel.Crl.GetEncoded(),"application/pkix-crl" , "root.crl");
     }
 }
