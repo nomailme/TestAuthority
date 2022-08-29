@@ -110,7 +110,7 @@ public class CertificateBuilder2 : ICertificateBuilder
             return this;
         }
 
-        certificateGenerator.AddExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(1));
+        certificateGenerator.AddExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true));
         return this;
     }
 
