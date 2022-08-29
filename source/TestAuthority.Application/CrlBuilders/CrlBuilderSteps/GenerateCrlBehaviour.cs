@@ -2,7 +2,6 @@ using MediatR;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.X509.Extension;
-using TestAuthority.Application.Extensions;
 using TestAuthority.Application.SignatureFactoryProviders;
 using TestAuthority.Domain;
 using TestAuthority.Domain.Models;
@@ -23,21 +22,25 @@ public class GenerateCrlBehaviour : IPipelineBehavior<CrlBuilderRequest, CrlFile
 
     public Task<CrlFileModel> Handle(CrlBuilderRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<CrlFileModel> next)
     {
+        var signerInfo = request.SerialNumber == String.Empty
+            ? request.SignerInfo.CertificateChain.Last().Certificate
+            : request.SignerInfo.CertificateChain.First(x => string.Equals(x.Certificate.SerialNumber.ToString(), request.SerialNumber)).Certificate;
+
         request.CrlGenerator.SetThisUpdate(timeServer.Now.Subtract(TimeSpan.FromHours(5)).DateTime);
         request.CrlGenerator.SetNextUpdate(timeServer.Now.AddYears(1).DateTime);
-        request.CrlGenerator.SetIssuerDN(request.SignerInfo.Subject);
+        request.CrlGenerator.SetIssuerDN(signerInfo.SubjectDN);
 
-        request.CrlGenerator.AddCrlEntry(BigInteger.One, DateTime.Now, CrlReason.PrivilegeWithdrawn);
+        request.CrlGenerator.AddCrlEntry(BigInteger.One, DateTime.Now, CrlReason.KeyCompromise);
 
         request.CrlGenerator.AddExtension(X509Extensions.AuthorityKeyIdentifier,
             false,
-            new AuthorityKeyIdentifierStructure(request.SignerInfo.GetSignerCertificate()));
+            new AuthorityKeyIdentifierStructure(signerInfo.GetPublicKey()));
 
         var crlNumber = new BigInteger(timeServer.Now.ToString("yyyyMMddHHmm"));
         request.CrlGenerator.AddExtension(X509Extensions.CrlNumber, false, new CrlNumber(crlNumber));
 
-        var crlTemp = signatureFactoryProvider.Generate(request.CrlGenerator);
-        var result = new CrlFileModel(crlTemp);
+        var crl = signatureFactoryProvider.Generate(request.CrlGenerator);
+        var result = new CrlFileModel(crl);
         return Task.FromResult(result);
     }
 }

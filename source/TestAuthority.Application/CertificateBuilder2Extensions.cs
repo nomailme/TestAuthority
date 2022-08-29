@@ -39,6 +39,29 @@ public static class CertificateBuilder2Extensions
         return builder;
     }
 
+    public static ICertificateBuilder WithCrlDistributionPoint(this ICertificateBuilder builder, List<string> crlAddresses)
+    {
+        if (crlAddresses.Any() == false)
+        {
+            return builder;
+        }
+        var distributionPoints = new List<DistributionPoint>();
+
+        foreach (var distributionPointUri in crlAddresses)
+        {
+            var generalNames = new GeneralNames(new GeneralName(GeneralName.UniformResourceIdentifier, distributionPointUri));
+            var distributionPointName = new DistributionPointName(generalNames);
+            var crlDistributionPoint = new DistributionPoint(distributionPointName, null, null);
+            distributionPoints.Add(crlDistributionPoint);
+        }
+
+
+        var extension = new CrlDistPoint(distributionPoints.ToArray());
+        builder.AddExtension(X509Extensions.CrlDistributionPoints.Id, extension);
+
+        return builder;
+    }
+
     /// <summary>
     ///     Set extended key usage(EKU) extension.
     /// </summary>
@@ -75,7 +98,10 @@ public static class CertificateBuilder2Extensions
             .ToList()
             .ForEach(result.Add);
 
-        if (result.Any() == false) return builder;
+        if (result.Any() == false)
+        {
+            return builder;
+        }
 
         var extension = new DerSequence(result.ToArray());
         builder.AddExtension(X509Extensions.SubjectAlternativeName.Id, extension);
@@ -92,10 +118,7 @@ public static class CertificateBuilder2Extensions
     {
         ArgumentNullException.ThrowIfNull(commonName);
 
-        var subjectComponents = new Dictionary<DerObjectIdentifier, string>
-        {
-            { X509Name.CN, commonName }
-        };
+        var subjectComponents = new Dictionary<DerObjectIdentifier, string> { { X509Name.CN, commonName } };
 
         var subject = GetX509Name(subjectComponents);
 

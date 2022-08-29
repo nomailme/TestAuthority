@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Options;
 using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Math;
 using TestAuthority.Domain.Models;
 
 namespace TestAuthority.Application.CertificateBuilders.CertificateBuilderSteps;
@@ -16,7 +17,8 @@ public class CrlDistributionPointExtensionBehaviour : IPipelineBehavior<Certific
 
     public async Task<CertificateWithKey> Handle(CertificateBuilderRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<CertificateWithKey> next)
     {
-        var distributionPointUris = crlSettings.Value?.CrlDistributionPoints?.ToList() ?? new List<string>();
+        var serialNumber = request.SignerCertificate.SerialNumber;
+        var distributionPointUris = GetCrlAddresses(crlSettings.Value, serialNumber);
         if (distributionPointUris.Any() == false)
         {
             return await next();
@@ -35,5 +37,10 @@ public class CrlDistributionPointExtensionBehaviour : IPipelineBehavior<Certific
         CrlDistPoint extension = new CrlDistPoint(distributionPoints.ToArray());
         request.CertificateGenerator.AddExtension(X509Extensions.CrlDistributionPoints.Id, false, extension);
         return await next();
+    }
+
+    private static List<string> GetCrlAddresses(CrlSettings settings, BigInteger certificateSerialNumber)
+    {
+        return new List<string> { $"{settings.CaAddress}/api/crl/{certificateSerialNumber}" };
     }
 }

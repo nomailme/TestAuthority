@@ -1,5 +1,7 @@
+using Microsoft.Extensions.Options;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Security;
 using TestAuthority.Application.Store;
 using TestAuthority.Domain.Models;
@@ -20,14 +22,16 @@ public class RootWithIntermediateCertificateProvider : ISignerProvider
     private readonly Func<SecureRandom, ICertificateBuilder> builderFactory;
     private readonly ICertificateStore certificateStore;
     private readonly IRandomService randomService;
+    private readonly IOptions<CrlSettings> crlSettings;
 
     /// <summary>
     ///     Ctor.
     /// </summary>
-    public RootWithIntermediateCertificateProvider(ICertificateStore certificateStore, IRandomService randomService)
+    public RootWithIntermediateCertificateProvider(ICertificateStore certificateStore, IRandomService randomService, IOptions<CrlSettings> crlSettings)
     {
         this.certificateStore = certificateStore;
         this.randomService = randomService;
+        this.crlSettings = crlSettings;
         builderFactory = random => new CertificateBuilder2(random);
     }
 
@@ -75,9 +79,15 @@ public class RootWithIntermediateCertificateProvider : ISignerProvider
             .WithAuthorityKeyIdentifier(signerCertificate.KeyPair)
             .WithSubjectKeyIdentifier()
             .WithIssuerName(signerCertificate.Certificate.SubjectDN)
+            .WithCrlDistributionPoint(GetCrlAddresses(crlSettings.Value, signerCertificate.Certificate.SerialNumber))
             .Generate(signerCertificate.KeyPair);
 
         return certificate;
+    }
+
+    private static List<string> GetCrlAddresses(CrlSettings settings, BigInteger certificateSerialNumber)
+    {
+        return new List<string> { $"{settings.CaAddress}/api/crl/{certificateSerialNumber}" };
     }
 
     private CertificateWithKey GenerateRootCertificate()

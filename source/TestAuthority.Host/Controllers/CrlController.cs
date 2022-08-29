@@ -1,3 +1,4 @@
+using System;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
@@ -47,12 +48,12 @@ public class CrlController: Controller
     /// <summary>
     /// Issue a Certificate Revocation List in DER.
     /// </summary>
-    [HttpGet("root.crl")]
-    public async Task<FileResult> GetCrl()
+    [HttpGet("{serialNumber}")]
+    public async Task<FileResult> GetCrl(string serialNumber)
     {
         var signer = signerProvider.GetCertificateSignerInfo();
-        var crlModel = await mediator.Send(new CrlBuilderRequest(signer));
+        var crlModel = await mediator.Send(new CrlBuilderRequest(signer, serialNumber));
 
-        return File(crlModel.Crl.GetEncoded(),"application/pkix-crl" , "root.crl");
+        return File(crlModel.Crl.GetEncoded(),"application/pkix-crl" , $"{serialNumber}-{DateTimeOffset.UnixEpoch}.crl");
     }
 }
