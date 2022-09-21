@@ -13,7 +13,7 @@ public record CrlBuilderRequest : IRequest<CrlFileModel>
     public CrlBuilderRequest(CertificateSignerInfo signerInfo)
     {
         SignerInfo = signerInfo;
-        SerialNumber = signerInfo.CertificateChain.Last().Certificate.SerialNumber.ToString();
+        SerialNumber = signerInfo.CertificateChain.Last().Certificate.SerialNumber.ToString(16);
     }
 
     public CrlBuilderRequest(CertificateSignerInfo signerInfo, string serialNumber)

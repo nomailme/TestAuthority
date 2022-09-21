@@ -40,20 +40,20 @@ public static class CertificateAuthorityExtensions
     /// <param name="services"><see cref="IServiceCollection" />.</param>
     public static void AddCertificateGenerationPipeline(this IServiceCollection services)
     {
-        services.AddScoped<IRequestPreProcessor<CertificateBuilderRequest>, KeyPairGenerationBehaviour>();
+        services.AddTransient<IRequestPreProcessor<CertificateBuilderRequest>, KeyPairGenerationBehaviour>();
 
-        services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, CommonNameBehaviour>();
-        services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, IssuerNameBehaviour>();
-        services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, SerialNumberBehaviour>();
-        services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, CertificateValidityBehaviour>();
-        services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, SubjectAlternativeNameBehaviour>();
-        services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, CrlDistributionPointExtensionBehaviour>();
-        services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, BasicConstraintsExtensionBehaviour>();
-        services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, ExtendedKeyUsageExtensionBehaviour>();
-        services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, AuthorityKeyIdentifierExtensionBehavior>();
-        services.AddScoped<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, SignCertificateBehaviour>();
+        services.AddTransient<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, CommonNameBehaviour>();
+        services.AddTransient<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, IssuerNameBehaviour>();
+        services.AddTransient<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, SerialNumberBehaviour>();
+        services.AddTransient<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, CertificateValidityBehaviour>();
+        services.AddTransient<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, SubjectAlternativeNameBehaviour>();
+        services.AddTransient<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, CrlDistributionPointExtensionBehaviour>();
+        services.AddTransient<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, BasicConstraintsExtensionBehaviour>();
+        services.AddTransient<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, ExtendedKeyUsageExtensionBehaviour>();
+        services.AddTransient<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, AuthorityKeyIdentifierExtensionBehavior>();
+        services.AddTransient<IPipelineBehavior<CertificateBuilderRequest, CertificateWithKey>, SignCertificateBehaviour>();
 
-        services.AddScoped<IRequestPostProcessor<CertificateBuilderRequest, CertificateWithKey>, CertificateLoggingPostProcessor>();
+        services.AddTransient<IRequestPostProcessor<CertificateBuilderRequest, CertificateWithKey>, CertificateLoggingPostProcessor>();
     }
 
     /// <summary>
@@ -62,6 +62,6 @@ public static class CertificateAuthorityExtensions
     /// <param name="services"><see cref="IServiceCollection" />.</param>
     public static void AddCrlGenerationPipeline(this IServiceCollection services)
     {
-        services.AddScoped<IPipelineBehavior<CrlBuilderRequest, CrlFileModel>, GenerateCrlBehaviour>();
+        services.AddTransient<IPipelineBehavior<CrlBuilderRequest, CrlFileModel>, GenerateCrlBehaviour>();
     }
 }

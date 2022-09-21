@@ -78,7 +78,7 @@ public class CertificateController : Controller
         else
         {
             var resultFilename = string.Concat(request.Filename.Trim('.'), ".zip");
-            var pem = converter.ConvertToPemArchive(result);
+            var pem = await converter.ConvertToPemArchiveAsync(result);
             return File(pem, MediaTypeNames.Application.Zip, resultFilename);
         }
     }

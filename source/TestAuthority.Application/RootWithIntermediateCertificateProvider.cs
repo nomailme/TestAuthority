@@ -87,7 +87,7 @@ public class RootWithIntermediateCertificateProvider : ISignerProvider
 
     private static List<string> GetCrlAddresses(CrlSettings settings, BigInteger certificateSerialNumber)
     {
-        return new List<string> { $"{settings.CaAddress}/api/crl/{certificateSerialNumber}" };
+        return new List<string> { $"{settings.CaAddress}/api/crl/{certificateSerialNumber.ToString(16)}" };
     }
 
     private CertificateWithKey GenerateRootCertificate()

@@ -24,7 +24,7 @@ public class GenerateCrlBehaviour : IPipelineBehavior<CrlBuilderRequest, CrlFile
     {
         var signerInfo = request.SerialNumber == String.Empty
             ? request.SignerInfo.CertificateChain.Last().Certificate
-            : request.SignerInfo.CertificateChain.First(x => string.Equals(x.Certificate.SerialNumber.ToString(), request.SerialNumber)).Certificate;
+            : request.SignerInfo.CertificateChain.First(x => string.Equals(x.Certificate.SerialNumber.ToString(16), request.SerialNumber)).Certificate;
 
         request.CrlGenerator.SetThisUpdate(timeServer.Now.Subtract(TimeSpan.FromHours(5)).DateTime);
         request.CrlGenerator.SetNextUpdate(timeServer.Now.AddYears(1).DateTime);

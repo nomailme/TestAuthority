@@ -12,7 +12,7 @@ public interface ICertificateConverter
     /// </summary>
     /// <param name="certificate"><seecref name="CertificateWithKey"/>.</param>
     /// <returns>Zip archive as a byte array.</returns>
-    byte[] ConvertToPemArchive(CertificateWithKey certificate);
+    Task<byte[]> ConvertToPemArchiveAsync(CertificateWithKey certificate);
 
     /// <summary>
     /// Convert certificate with key to pfx file.
