@@ -170,7 +170,7 @@ public class CertificateConverterService : ICertificateConverter
             var writer = new PemWriter(textWriter);
             writer.WriteObject(generator);
             writer.Writer.Flush();
-            outputString = textWriter.ToString();
+            outputString = textWriter.ToString().Trim('\r','\n');
         }
 
         if (string.IsNullOrWhiteSpace(outputString))
