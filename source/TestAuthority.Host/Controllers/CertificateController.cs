@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TestAuthority.Application.CertificateBuilders;
-using TestAuthority.Application.Extensions;
 using TestAuthority.Domain.CertificateConverters;
 using TestAuthority.Domain.Models;
 using TestAuthority.Domain.Services;
@@ -44,7 +43,7 @@ public class CertificateController : Controller
     [HttpGet("/api/certificate/root")]
     public IActionResult GetRootCertificate()
     {
-        var result = signerProvider.GetCertificateSignerInfo().GetSignerCertificate().GetEncoded();
+        var result = signerProvider.GetCertificateSignerInfo().GetRootCertificate().GetEncoded();
         return File(result, MediaTypeNames.Application.Octet, "root.cer");
     }
 
@@ -65,7 +64,7 @@ public class CertificateController : Controller
         };
 
 
-        var crtRequest = new CertificateBuilderRequest(certificateRequest, signerProvider.GetCertificateSignerInfo().GetSignerCertificate());
+        var crtRequest = new CertificateBuilderRequest(certificateRequest, signerProvider.GetCertificateSignerInfo().GetSignerCertificate().Certificate);
         var result = await mediator.Send(crtRequest);
 
 

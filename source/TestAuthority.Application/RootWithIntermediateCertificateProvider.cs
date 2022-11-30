@@ -64,7 +64,7 @@ public class RootWithIntermediateCertificateProvider : ISignerProvider
         var random = randomService.GenerateRandom();
         var commonName = $"Intermediate Test Authority {DateTime.UtcNow:MM/yyyy}";
         var notBefore = DateTimeOffset.UtcNow.AddHours(-2);
-        var notAfter = DateTimeOffset.UtcNow.AddYears(5);
+        var notAfter = DateTimeOffset.UtcNow.AddYears(10);
 
         var builder = builderFactory(random);
 
@@ -95,7 +95,7 @@ public class RootWithIntermediateCertificateProvider : ISignerProvider
         var random = randomService.GenerateRandom();
         var commonName = $"Test Authority {DateTime.UtcNow:MM/yyyy}";
         var notBefore = DateTimeOffset.UtcNow.AddHours(-2);
-        var notAfter = DateTimeOffset.UtcNow.AddYears(5);
+        var notAfter = DateTimeOffset.UtcNow.AddYears(15);
 
         var builder = builderFactory(random);
 

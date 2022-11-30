@@ -7,7 +7,6 @@ using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.X509;
 using TestAuthority.Application.CrlBuilders;
-using TestAuthority.Application.Extensions;
 using TestAuthority.Domain.CertificateConverters;
 using TestAuthority.Domain.Models;
 using TestAuthority.Domain.Services;
@@ -88,7 +87,7 @@ public class CertificateConverterService : ICertificateConverter
     {
         var signerInfo = signerProvider.GetCertificateSignerInfo();
         var rootCertificate = signerInfo.GetRootCertificate();
-        var intermediateCertificates = signerInfo.GetIntermediateCertificates().Select(x => x.Certificate).ToList();
+        var intermediateCertificates = signerInfo.GetIntermediateCertificates();
 
 
         var crls = await GetCrls(signerInfo);

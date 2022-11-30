@@ -1,4 +1,5 @@
 using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.X509;
 
 namespace TestAuthority.Domain.Models;
 
@@ -20,4 +21,16 @@ public record CertificateSignerInfo(List<CertificateWithKey> CertificateChain)
     /// Elements [1..n-1] are intermediate certificates.
     /// </remarks>
     public List<CertificateWithKey> CertificateChain { get; } = CertificateChain;
+
+    public CertificateWithKey GetSignerCertificate() => CertificateChain.First();
+
+    public X509Certificate GetRootCertificate() => CertificateChain.Last().Certificate;
+    
+    public List<X509Certificate> GetIntermediateCertificates() {
+        if (CertificateChain.Count < 2)
+        {
+            return new List<X509Certificate>();
+        }
+        return CertificateChain.GetRange(0, CertificateChain.Count - 1).ConvertAll(x=>x.Certificate);
+    }
 }

@@ -1,4 +1,3 @@
-using TestAuthority.Application.Extensions;
 using TestAuthority.Domain.Models;
 
 namespace TestAuthority.UnitTests;
@@ -32,6 +31,8 @@ public class SignerInfoExtensionsTests
         CertificateSignerInfo signerInfo = new CertificateSignerInfo(chain);
 
         var intermediateCertificates = signerInfo.GetIntermediateCertificates();
-        Assert.DoesNotContain(intermediateCertificates, x=>x.Certificate.SubjectDN.ToString().Contains("CN=Root"));
+        Assert.DoesNotContain(intermediateCertificates, x=>x.SubjectDN.ToString().Contains("CN=Root"));
+        Assert.Equal(2,intermediateCertificates.Count);
+        
     }
 }
