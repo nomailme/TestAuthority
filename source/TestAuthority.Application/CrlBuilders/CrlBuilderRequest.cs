@@ -9,7 +9,6 @@ namespace TestAuthority.Application.CrlBuilders;
 /// </summary>
 public record CrlBuilderRequest : IRequest<CrlFileModel>
 {
-
     public CrlBuilderRequest(CertificateSignerInfo signerInfo)
     {
         SignerInfo = signerInfo;

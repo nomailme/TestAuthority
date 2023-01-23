@@ -17,19 +17,19 @@ public class CrlController: Controller
 {
     private readonly IMediator mediator;
     private readonly ISignerProvider signerProvider;
-    private readonly ICertificateConverter converter;
+    private readonly ICertificateConverterService converterService;
 
     /// <summary>
     /// Ctor.
     /// </summary>
     /// <param name="mediator"><see cref="IMediator"/>.</param>
     /// <param name="signerProvider"><see cref="ISignerProvider"/>.</param>
-    /// <param name="converter"><see cref="ICertificateConverter"/>.</param>
-    public CrlController(IMediator mediator, ISignerProvider signerProvider, ICertificateConverter converter)
+    /// <param name="converterService"><see cref="ICertificateConverterService"/>.</param>
+    public CrlController(IMediator mediator, ISignerProvider signerProvider, ICertificateConverterService converterService)
     {
         this.mediator = mediator;
         this.signerProvider = signerProvider;
-        this.converter = converter;
+        this.converterService = converterService;
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ public class CrlController: Controller
         var signer = signerProvider.GetCertificateSignerInfo();
         var crl = await mediator.Send(new CrlBuilderRequest(signer));
 
-        var result = converter.ConvertToPem(crl);
+        var result = await converterService.ConvertToPem(crl);
         return File(result, MediaTypeNames.Application.Octet, "root.crl");
     }
 

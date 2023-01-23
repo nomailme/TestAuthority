@@ -10,9 +10,9 @@ namespace TestAuthority.Application.CrlBuilders.CrlBuilderSteps;
 
 public class GenerateCrlBehaviour : IPipelineBehavior<CrlBuilderRequest, CrlFileModel>
 {
+    private readonly ISignatureFactoryProvider signatureFactoryProvider;
 
     private readonly ITimeServer timeServer;
-    private readonly ISignatureFactoryProvider signatureFactoryProvider;
 
     public GenerateCrlBehaviour(ITimeServer timeServer, ISignatureFactoryProvider signatureFactoryProvider)
     {
@@ -32,7 +32,8 @@ public class GenerateCrlBehaviour : IPipelineBehavior<CrlBuilderRequest, CrlFile
 
         request.CrlGenerator.AddCrlEntry(BigInteger.One, DateTime.Now, CrlReason.KeyCompromise);
 
-        request.CrlGenerator.AddExtension(X509Extensions.AuthorityKeyIdentifier,
+        request.CrlGenerator.AddExtension(
+            X509Extensions.AuthorityKeyIdentifier,
             false,
             new AuthorityKeyIdentifierStructure(signerInfo.GetPublicKey()));
 

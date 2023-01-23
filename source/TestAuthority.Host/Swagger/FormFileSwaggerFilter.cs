@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 namespace TestAuthority.Host.Swagger;
 
 /// <summary>
-/// AddSwaggerFileUploadButton.
+///     AddSwaggerFileUploadButton.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public class AddSwaggerFileUploadButtonAttribute : Attribute
@@ -15,7 +15,7 @@ public class AddSwaggerFileUploadButtonAttribute : Attribute
 }
 
 /// <summary>
-/// Filter to enable handling file upload in swagger
+///     Filter to enable handling file upload in swagger
 /// </summary>
 public class AddFileParamTypesOperationFilter : IOperationFilter
 {
@@ -23,10 +23,10 @@ public class AddFileParamTypesOperationFilter : IOperationFilter
     private static readonly string[] fileParameters = { "ContentType", "ContentDisposition", "Headers", "Length", "Name", "FileName" };
 
     /// <summary>
-    /// Apply filter.
+    ///     Apply filter.
     /// </summary>
-    /// <param name="operation"><seecref name="OpenApiOperation"/>.</param>
-    /// <param name="context"><seecref name="OperationFilterContext"/>.</param>
+    /// <param name="operation"><seecref name="OpenApiOperation" />.</param>
+    /// <param name="context"><seecref name="OperationFilterContext" />.</param>
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         var operationHasFileUploadButton = context.MethodInfo.GetCustomAttributes(true).OfType<AddSwaggerFileUploadButtonAttribute>().Any();
@@ -49,7 +49,9 @@ public class AddFileParamTypesOperationFilter : IOperationFilter
                         {
                             ["file"] = new OpenApiSchema
                             {
-                                Description = "Select file", Type = "string", Format = "binary"
+                                Description = "Select file",
+                                Type = "string",
+                                Format = "binary"
                             }
                         }
                     }

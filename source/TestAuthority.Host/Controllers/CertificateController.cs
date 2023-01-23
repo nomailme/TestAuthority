@@ -7,6 +7,7 @@ using TestAuthority.Application.CertificateBuilders;
 using TestAuthority.Domain.CertificateConverters;
 using TestAuthority.Domain.Models;
 using TestAuthority.Domain.Services;
+using CertificateRequestModel = TestAuthority.Host.Contracts.CertificateRequestModel;
 
 namespace TestAuthority.Host.Controllers;
 
@@ -16,23 +17,22 @@ namespace TestAuthority.Host.Controllers;
 [Route("api/certificate")]
 public class CertificateController : Controller
 {
-    private readonly ICertificateConverter converter;
+    private readonly ICertificateConverterService converterService;
     private readonly IMediator mediator;
     private readonly ISignerProvider signerProvider;
 
     /// <summary>
     ///     Ctor.
     /// </summary>
-    /// <param name="signerProvider"><see cref="ISignerProvider"/>.</param>
-    /// <param name="converter"><seecref name="ICertificateConverter" />.</param>
-    /// <param name="mediator"><see cref="IMediator"/>.</param>
-    public CertificateController(
-        ISignerProvider signerProvider,
-        ICertificateConverter converter,
+    /// <param name="signerProvider"><see cref="ISignerProvider" />.</param>
+    /// <param name="converterService"><seecref name="ICertificateConverter" />.</param>
+    /// <param name="mediator"><see cref="IMediator" />.</param>
+    public CertificateController(ISignerProvider signerProvider,
+        ICertificateConverterService converterService,
         IMediator mediator)
     {
         this.signerProvider = signerProvider;
-        this.converter = converter;
+        this.converterService = converterService;
         this.mediator = mediator;
     }
 
@@ -53,9 +53,9 @@ public class CertificateController : Controller
     /// <param name="request">Certificate request.</param>
     /// <returns>Result.</returns>
     [HttpGet]
-    public async Task<IActionResult> IssueCertificate(Contracts.CertificateRequestModel request)
+    public async Task<IActionResult> IssueCertificate(CertificateRequestModel request)
     {
-        var certificateRequest = new CertificateRequestModel
+        var certificateRequest = new Domain.Models.CertificateRequestModel
         {
             CommonName = request.CommonName,
             Hostnames = request.Hostname.ToList(),
@@ -71,13 +71,13 @@ public class CertificateController : Controller
         if (request.Format == OutputFormat.Pfx)
         {
             var resultFilename = string.Concat(request.Filename.Trim('.'), ".pfx");
-            var pfx = converter.ConvertToPfx(result, request.Password);
+            var pfx = await converterService.ConvertToPfx(result, request.Password);
             return File(pfx, MediaTypeNames.Application.Octet, resultFilename);
         }
         else
         {
             var resultFilename = string.Concat(request.Filename.Trim('.'), ".zip");
-            var pem = await converter.ConvertToPemArchiveAsync(result);
+            var pem = await converterService.ConvertToPemArchiveAsync(result);
             return File(pem, MediaTypeNames.Application.Zip, resultFilename);
         }
     }

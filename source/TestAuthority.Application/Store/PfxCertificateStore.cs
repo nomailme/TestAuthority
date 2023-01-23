@@ -22,13 +22,6 @@ public class PfxCertificateStore : ICertificateStore
         this.randomService = randomService;
     }
 
-
-    private bool Exists(string certificateName)
-    {
-        var path = GetCertificatePath(certificateName);
-        return File.Exists(path);
-    }
-
     /// <inheritdoc />
     public bool TryGet(string certificateName, IContainerOptions options, [MaybeNullWhen(false)] out CertificateWithKey certificateWithKey)
     {
@@ -41,24 +34,37 @@ public class PfxCertificateStore : ICertificateStore
         return true;
     }
 
-    private CertificateWithKey GetCertificate(string certificateName, IContainerOptions options)
-    {
-        if (options is PfxContainerOptions pfxOptions == false) throw new ArgumentException("Options must be of type PfxContainerOptions", nameof(options));
-        var path = GetCertificatePath(certificateName);
-        var rawData = File.ReadAllBytes(path);
-        return Convert(rawData, pfxOptions.PfxPassword);
-    }
-
     /// <inheritdoc />
     public void SaveCertificate(ReadOnlySpan<char> certificateName, CertificateWithKey certificateWithKey, IContainerOptions options)
     {
-        if (options is PfxContainerOptions pfxOptions == false) throw new ArgumentException("Options must be of type PfxContainerOptions", nameof(options));
+        if (options is PfxContainerOptions pfxOptions == false)
+        {
+            throw new ArgumentException("Options must be of type PfxContainerOptions", nameof(options));
+        }
         ArgumentNullException.ThrowIfNull(pfxOptions.PfxPassword);
 
         var path = GetCertificatePath(certificateName);
         var rawData = ConvertToPfx(certificateWithKey.Certificate, (RsaPrivateCrtKeyParameters)certificateWithKey.KeyPair.Private, pfxOptions.PfxPassword);
 
         File.WriteAllBytes(path, rawData);
+    }
+
+
+    private bool Exists(string certificateName)
+    {
+        var path = GetCertificatePath(certificateName);
+        return File.Exists(path);
+    }
+
+    private CertificateWithKey GetCertificate(string certificateName, IContainerOptions options)
+    {
+        if (options is PfxContainerOptions pfxOptions == false)
+        {
+            throw new ArgumentException("Options must be of type PfxContainerOptions", nameof(options));
+        }
+        var path = GetCertificatePath(certificateName);
+        var rawData = File.ReadAllBytes(path);
+        return Convert(rawData, pfxOptions.PfxPassword);
     }
 
     private static string GetCertificatePath(ReadOnlySpan<char> certificateName)
@@ -91,12 +97,10 @@ public class PfxCertificateStore : ICertificateStore
         var certificateEntry = new X509CertificateEntry(cert);
 
         store.SetCertificateEntry(friendlyName, certificateEntry);
-        store.SetKeyEntry(friendlyName,
+        store.SetKeyEntry(
+            friendlyName,
             new AsymmetricKeyEntry(rsaParams),
-            new[]
-            {
-                certificateEntry
-            });
+            new[] { certificateEntry });
 
         using var stream = new MemoryStream();
         store.Save(stream, pfxPassword.ToCharArray(), random);

@@ -25,7 +25,9 @@ public class Pkcs12ToolsController : Controller
     /// <param name="filename">Output filename.</param>
     /// <returns>Certificate with private key in Pkcs12 container.</returns>
     [HttpPost("from-pem")]
-    public IActionResult ConvertToPfx(IFormFile pemCertificate, IFormFile pemKey, string password,
+    public IActionResult ConvertToPfx(IFormFile pemCertificate,
+        IFormFile pemKey,
+        string password,
         string filename = "certificate.pfx")
     {
         var certificate = ToArray(pemCertificate.OpenReadStream());
@@ -49,7 +51,10 @@ public class Pkcs12ToolsController : Controller
         using var stream = new MemoryStream(input);
         using var streamReader = new StreamReader(stream);
         var value = new PemReader(streamReader).ReadObject();
-        if (value is TOutput result) return result;
+        if (value is TOutput result)
+        {
+            return result;
+        }
 
         return null;
     }
@@ -64,7 +69,8 @@ public class Pkcs12ToolsController : Controller
 
         var asymmetricCipherKeyPair = ToCrypto<AsymmetricCipherKeyPair>(privateKey);
 
-        store.SetKeyEntry(x509Certificate.SubjectDN.ToString(),
+        store.SetKeyEntry(
+            x509Certificate.SubjectDN.ToString(),
             new AsymmetricKeyEntry(asymmetricCipherKeyPair.Private), certificateEntry);
         var result = new MemoryStream();
         store.Save(result, password.ToCharArray(), new SecureRandom());

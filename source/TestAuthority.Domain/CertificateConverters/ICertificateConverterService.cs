@@ -5,7 +5,7 @@ namespace TestAuthority.Domain.CertificateConverters;
 /// <summary>
 /// Provides methods to convert certificates and keys.
 /// </summary>
-public interface ICertificateConverter
+public interface ICertificateConverterService
 {
     /// <summary>
     /// Convert certificate with key to ZIP archive containing certificate and key in PEM format.
@@ -20,12 +20,12 @@ public interface ICertificateConverter
     /// <param name="certificate"><seecref name="CertificateWithKey"/>.</param>
     /// <param name="password">Pfx password.</param>
     /// <returns>Pfx file as a byte array.</returns>
-    byte[] ConvertToPfx(CertificateWithKey certificate, string password);
+    Task<byte[]> ConvertToPfx(CertificateWithKey certificate, string password);
 
     /// <summary>
     /// Convert CRL to pem format.
     /// </summary>
     /// <param name="crl"><see cref="CrlFileModel"/>.</param>
     /// <returns>Pem representation of Crl.</returns>
-    byte[] ConvertToPem(CrlFileModel crl);
+    Task<byte[]> ConvertToPem(CrlFileModel crl);
 }

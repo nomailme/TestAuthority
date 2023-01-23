@@ -28,7 +28,7 @@ public static class CertificateAuthorityExtensions
     public static void AddCertificateAuthorityService(this IServiceCollection services)
     {
         services.AddSingleton<ICertificateStore, PfxCertificateStore>();
-        services.AddSingleton<ICertificateConverter, CertificateConverterService>();
+        services.AddSingleton<ICertificateConverterService, CertificateConverterService>();
         services.AddSingleton<ISignerProvider, RootWithIntermediateCertificateProvider>();
 
         services.AddSingleton<ISignatureFactoryProvider, RsaSignatureFactoryProvider>();

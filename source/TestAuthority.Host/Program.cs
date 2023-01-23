@@ -16,13 +16,14 @@ using TestAuthority.Host.Filters;
 using TestAuthority.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Host.UseSerilog(((context, services, configuration) =>
-{
-    configuration.ReadFrom.Configuration(context.Configuration);
-    configuration.ReadFrom.Services(services);
-    configuration.Enrich.FromLogContext();
-    configuration.WriteTo.Console();
-}));
+builder.Host.UseSerilog(
+    ((context, services, configuration) =>
+    {
+        configuration.ReadFrom.Configuration(context.Configuration);
+        configuration.ReadFrom.Services(services);
+        configuration.Enrich.FromLogContext();
+        configuration.WriteTo.Console();
+    }));
 
 builder.Services
     .AddControllers(x => x.Filters.Add<ValidationFilter>())
@@ -45,11 +46,12 @@ builder.Configuration.AddEnvironmentVariables();
 
 var app = builder.Build();
 app.UseSwagger();
-app.UseSwaggerUI(config =>
-{
-    config.SwaggerEndpoint("/swagger/v1/swagger.json", "Personal Signing Center");
-    config.RoutePrefix = string.Empty;
-});
+app.UseSwaggerUI(
+    config =>
+    {
+        config.SwaggerEndpoint("/swagger/v1/swagger.json", "Personal Signing Center");
+        config.RoutePrefix = string.Empty;
+    });
 
 app.MapControllers();
 app.Run();
