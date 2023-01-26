@@ -35,25 +35,30 @@ public class PfxConverter : ICertificateConverter
         var store = new Pkcs12Store();
         var random = randomService.GenerateRandom();
         var friendlyName = certificate.SubjectDN.ToString();
-        var signerInfo = signerProvider.GetCertificateSignerInfo();
-        var rootCertificate = signerInfo.GetRootCertificate();
-        var intermediateCertificates = signerInfo.GetIntermediateCertificates();
 
-        store.SetCertificateEntry(rootCertificate.SubjectDN.ToString(), new X509CertificateEntry(rootCertificate));
+        var chain = BuildChainCertificate(certificate)
+            .Select(x => new X509CertificateEntry(x))
+            .ToArray();
 
-        foreach (var intermediateCertificate in intermediateCertificates)
-        {
-            store.SetCertificateEntry(intermediateCertificate.SubjectDN.ToString(), new X509CertificateEntry(intermediateCertificate));
-        }
-
-        var certificateEntry = new X509CertificateEntry(certificate);
-
-        store.SetCertificateEntry(friendlyName, certificateEntry);
-        store.SetKeyEntry(friendlyName, new AsymmetricKeyEntry(rsaParams), new[] { certificateEntry });
+        store.SetKeyEntry(friendlyName, new AsymmetricKeyEntry(rsaParams), chain);
 
         using var stream = new MemoryStream();
         store.Save(stream, pfxPassword.ToCharArray(), random);
         return Task.FromResult(stream.ToArray());
+    }
+
+    private IEnumerable<X509Certificate> BuildChainCertificate(X509Certificate certificate)
+    {
+        var signerInfo = signerProvider.GetCertificateSignerInfo();
+
+        var rootCertificate = signerInfo.GetRootCertificate();
+        var intermediateCertificates = signerInfo.GetIntermediateCertificates();
+        yield return certificate;
+        foreach (var intermediateCertificate in intermediateCertificates)
+        {
+            yield return intermediateCertificate;
+        }
+        yield return rootCertificate;
     }
 
     public class PfxConverterOptions : ICertificateConverterOptions
