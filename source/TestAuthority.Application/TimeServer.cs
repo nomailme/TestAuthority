@@ -6,5 +6,5 @@ namespace TestAuthority.Application;
 public class TimeServer: ITimeServer
 {
     /// <inheritdoc />
-    public DateTimeOffset Now { get; } = DateTimeOffset.Now;
+    public DateTimeOffset Now => DateTimeOffset.Now;
 }
